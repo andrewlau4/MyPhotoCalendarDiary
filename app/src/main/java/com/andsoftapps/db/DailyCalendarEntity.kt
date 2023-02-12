@@ -39,7 +39,7 @@ class DiaryCalendarEntityFTS (
 
     var id: Int,
 
-    @ColumnInfo(name = "userNotes")
-    var userNotes: String?
+    @ColumnInfo(name = "userDiary")
+    var userDiary: String?
 )
 

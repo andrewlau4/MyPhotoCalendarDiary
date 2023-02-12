@@ -91,8 +91,11 @@ dependencies {
     implementation "androidx.room:room-runtime:$room_version"
     annotationProcessor "androidx.room:room-compiler:$room_version"
     //got error:
-    //Caused by: org.gradle.api.tasks.TaskInstantiationException: Could not create task of type 'KspTaskJvm'
-//    ksp "androidx.room:room-compiler:$room_version"
+    //Caused by: org.gradle.api.tasks.TaskInstantiationException: Could not create task of type 'KspTaskJvm', upgrade the ksp version,
+    //   now get warning  warning: The following options were not recognized by any processor: '[room.schemaLocation]'
+    // changed ksp to kapt
+    //ksp "androidx.room:room-compiler:$room_version"
+    kapt "androidx.room:room-compiler:$room_version"
     implementation "androidx.room:room-ktx:$room_version"
 
     implementation 'com.google.dagger:hilt-android:2.44.2'
