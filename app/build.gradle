@@ -1,6 +1,12 @@
 plugins {
     id 'com.android.application'
     id 'org.jetbrains.kotlin.android'
+
+    id 'org.jetbrains.kotlin.kapt'
+
+    id 'com.google.devtools.ksp'
+
+    id 'com.google.dagger.hilt.android'
 }
 
 android {
@@ -15,6 +21,15 @@ android {
         versionName "1.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+
+        javaCompileOptions {
+            annotationProcessorOptions {
+                arguments += [
+                        "room.schemaLocation":"$projectDir/schemas".toString(),
+                        "room.incremental":"true",
+                        "room.expandProjection":"true"]
+            }
+        }
     }
 
     buildTypes {
@@ -24,20 +39,68 @@ android {
         }
     }
     compileOptions {
+
+        //https://stackoverflow.com/questions/56695997/how-to-fix-call-requires-api-level-26-current-min-is-25-error-in-android
+        coreLibraryDesugaringEnabled true
+
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
     kotlinOptions {
         jvmTarget = '1.8'
     }
+
+    buildFeatures {
+        compose true
+        viewBinding true
+    }
+
+    composeOptions {
+        kotlinCompilerExtensionVersion = "1.4.2"
+    }
+
 }
 
 dependencies {
 
-    implementation 'androidx.core:core-ktx:1.7.0'
+    coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:1.2.2'
+
+    implementation 'androidx.core:core-ktx:1.9.0'
     implementation 'androidx.appcompat:appcompat:1.6.1'
     implementation 'com.google.android.material:material:1.8.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
+
+    implementation 'androidx.activity:activity-compose:1.6.1'
+    implementation 'androidx.navigation:navigation-fragment-ktx:2.5.3'
+    implementation 'androidx.navigation:navigation-ui-ktx:2.5.3'
+    implementation 'androidx.compose.material:material:1.3.1'
+
+    implementation 'io.coil-kt:coil-compose:2.2.2'
+
+    def lifecycle_version = "2.5.1"
+    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycle_version"
+    implementation "androidx.lifecycle:lifecycle-viewmodel-compose:$lifecycle_version"
+    implementation "androidx.lifecycle:lifecycle-runtime-ktx:$lifecycle_version"
+    implementation "androidx.lifecycle:lifecycle-viewmodel-savedstate:$lifecycle_version"
+
+    implementation 'androidx.compose.ui:ui-tooling:1.3.3'
+    implementation 'androidx.constraintlayout:constraintlayout-compose:1.0.1'
+    implementation 'androidx.compose.ui:ui-viewbinding:1.3.3'
+
+    def room_version = "2.5.0"
+    implementation "androidx.room:room-runtime:$room_version"
+    annotationProcessor "androidx.room:room-compiler:$room_version"
+    ksp "androidx.room:room-compiler:$room_version"
+    implementation "androidx.room:room-ktx:$room_version"
+
+    implementation 'com.google.dagger:hilt-android:2.44.2'
+    implementation 'androidx.hilt:hilt-navigation-compose:1.0.0'
+
+    kapt 'com.google.dagger:hilt-android-compiler:2.44.2'
+
+    implementation "androidx.navigation:navigation-compose:2.5.3"
+    implementation "androidx.compose.ui:ui-util:1.3.3"
+
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
