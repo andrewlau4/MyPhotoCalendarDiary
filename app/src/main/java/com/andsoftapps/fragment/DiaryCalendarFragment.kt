@@ -11,7 +11,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import com.andsoftapps.R
 import com.andsoftapps.compose.ComposeDiaryCalendarLocalProviders
-import com.andsoftapps.compose.DiaryCalendar
+import com.andsoftapps.compose.DiaryCalendarScreen
 import com.andsoftapps.viewmodel.DiaryCalendarViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -58,7 +58,7 @@ class DiaryCalendarFragment : Fragment() {
                             viewModel = diaryCalendarViewModel,
                             activity = activity as AppCompatActivity
                         ) {
-                            DiaryCalendar(viewModel = diaryCalendarViewModel)
+                            DiaryCalendarScreen(viewModel = diaryCalendarViewModel)
                         }
                     }
                 }
