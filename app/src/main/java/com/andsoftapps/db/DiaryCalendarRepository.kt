@@ -1,10 +1,13 @@
 package com.andsoftapps.db
 
 import android.content.Context
+import android.net.Uri
 import androidx.room.Room
 import com.andsoftapps.ApplicationIOScope
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.Flow
+import java.time.YearMonth
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -23,5 +26,23 @@ class DiaryCalendarRepository
             DATABASE_NAME
             )
         .build()
+
+    suspend fun insertOrUpdate(month: YearMonth, day: Int, uri: Uri?) {
+        database.diaryCalendarDao().insertOrUpdate(month, day, uri)
+    }
+
+    suspend fun insertOrUpdate(year: Int, month: Int, day: Int, userDiary: String?) {
+        database.diaryCalendarDao().insertOrUpdate(year, month, day, userDiary)
+    }
+
+    fun getDiaryCalendarByMonth(year: Int, month: Int, query: String?): Flow<List<DiaryCalendarEntityWithQueryResult>> {
+        val queryString = query?.run {
+            trim().split(regex = Regex("\\s+", setOf(RegexOption.IGNORE_CASE)))
+                .map { "\"*" + this.replace("\"", "\"\"") + "*\"" }
+                .joinToString(" OR ") { it }
+        } ?: ""
+
+        return database.diaryCalendarDao().getDiaryCalendarByMonthWithQuery(year, month, queryString)
+    }
 
 }
