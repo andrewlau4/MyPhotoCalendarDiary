@@ -36,9 +36,10 @@ class DiaryCalendarRepository
     }
 
     fun getDiaryCalendarByMonth(year: Int, month: Int, query: String?): Flow<List<DiaryCalendarEntityWithQueryResult>> {
+        //added "*   and  *" and escape the " with "" within the string
         val queryString = query?.run {
-            trim().split(regex = Regex("\\s+", setOf(RegexOption.IGNORE_CASE)))
-                .map { "\"*" + this.replace("\"", "\"\"") + "*\"" }
+            trim().split(regex = Regex("\\s+"))
+                .map { "\"*" + replace("\"", "\"\"") + "*\"" }
                 .joinToString(" OR ") { it }
         } ?: ""
 

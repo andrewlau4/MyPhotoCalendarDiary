@@ -4,13 +4,16 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.compose.material.Text
+import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import com.andsoftapps.R
+import com.andsoftapps.compose.ComposeDiaryCalendarLocalProviders
+import com.andsoftapps.compose.DiaryCalendar
 import com.andsoftapps.viewmodel.DiaryCalendarViewModel
+import dagger.hilt.android.AndroidEntryPoint
 
 
 // TODO: Rename parameter arguments, choose names that match
@@ -23,6 +26,7 @@ private const val ARG_PARAM2 = "param2"
  * Use the [DiaryCalendarFragment.newInstance] factory method to
  * create an instance of this fragment.
  */
+@AndroidEntryPoint
 class DiaryCalendarFragment : Fragment() {
     // TODO: Rename and change types of parameters
     private var param1: String? = null
@@ -50,7 +54,12 @@ class DiaryCalendarFragment : Fragment() {
                     setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
 
                     setContent {
-                        Text("Test")
+                        ComposeDiaryCalendarLocalProviders(
+                            viewModel = diaryCalendarViewModel,
+                            activity = activity as AppCompatActivity
+                        ) {
+                            DiaryCalendar(viewModel = diaryCalendarViewModel)
+                        }
                     }
                 }
             }

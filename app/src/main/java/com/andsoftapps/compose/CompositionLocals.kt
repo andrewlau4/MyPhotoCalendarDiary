@@ -6,6 +6,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.navigation.NavHostController
 import com.andsoftapps.db.DiaryCalendarEntityWithQueryResult
 import com.andsoftapps.viewmodel.DiaryCalendarViewModel
 import kotlinx.coroutines.flow.Flow
@@ -23,21 +24,23 @@ val LocalDiaryEntities =
 val LocalHideShowActionBar =
     staticCompositionLocalOf<(Boolean) -> Unit> { error("LocalHideShowActionBar not provided") }
 
+val LocalNavigation =
+    staticCompositionLocalOf<(String?) -> Unit> { error("LocalNavigateComposition not initialized") }
 
 @Composable
-fun ComposeDiaryCalendarProviders(viewModel: DiaryCalendarViewModel,
-                                  activity: AppCompatActivity,
-                                  content:  @Composable () -> Unit) {
+fun ComposeDiaryCalendarLocalProviders(viewModel: DiaryCalendarViewModel,
+                                       activity: AppCompatActivity,
+                                       content:  @Composable () -> Unit) {
 
     CompositionLocalProvider(
         LocalSaveImgPath provides {
             yearAndMonth, day, uri ->
         },
-//
-//        LocalQueryDairyEntries provides {
-//            yearAndMonth ->
-//            return flowOf()
-//        },
+
+        LocalQueryDairyEntries provides {
+            yearAndMonth ->
+            viewModel.queryDiaryCalendarEntries(yearAndMonth)
+        },
 
         LocalHideShowActionBar provides {
             isHide ->
@@ -52,4 +55,21 @@ fun ComposeDiaryCalendarProviders(viewModel: DiaryCalendarViewModel,
         content()
     }
 
+}
+
+@Composable
+fun NavigationLocalProvider(navController: NavHostController, content: @Composable () -> Unit) {
+    CompositionLocalProvider(
+        LocalNavigation provides { destination: String? ->
+            if (destination != null && destination != navController.currentDestination?.route) {
+                navController.navigate(destination) {
+                    launchSingleTop = true
+                }
+            } else {
+                navController.popBackStack()
+            }
+        }
+    ) {
+        content()
+    }
 }
