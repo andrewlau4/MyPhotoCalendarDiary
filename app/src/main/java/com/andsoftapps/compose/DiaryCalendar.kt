@@ -62,7 +62,7 @@ private val BOTTOM_SHEET_HEIGHT = 130.dp
 @Composable
 fun DiaryCalendarScreen(viewModel: DiaryCalendarViewModel = hiltViewModel()) {
 
-    val uiState = viewModel.uiState.collectAsState()
+    val uiState by viewModel.uiState.collectAsState()
 
     val navController = rememberNavController()
 
@@ -74,7 +74,7 @@ fun DiaryCalendarScreen(viewModel: DiaryCalendarViewModel = hiltViewModel()) {
 
             composable(Route.Home.route) { from ->
 
-                DiaryCalendar(month = { uiState.value.currentYearMonth },
+                DiaryCalendar(month = { uiState.currentYearMonth },
                     monthChangeCallback = viewModel::setCurrentYearMonth)
 
             }
@@ -221,9 +221,12 @@ fun LazyGridScope.DiaryCalendarContent(month: YearMonth, firstDayOfWeek: Int, to
 
     items(7) {
         index ->
-        Text(text = DayOfWeek.of((index + 7) % 8).,
+        Text(text = DayOfWeek.of(
+            when (index) {
+                0 -> 7
+                else -> index }).name[0].toString(),
             color = Color.White,
-            style = MaterialTheme.typography.h5,
+            style = MaterialTheme.typography.body1,
             textAlign = TextAlign.Center,
             modifier = Modifier.background(color = Color.Black)
         )

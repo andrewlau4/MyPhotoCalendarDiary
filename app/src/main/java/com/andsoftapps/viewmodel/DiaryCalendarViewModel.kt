@@ -10,11 +10,13 @@ import com.andsoftapps.db.DiaryCalendarEntityWithQueryResult
 import com.andsoftapps.db.DiaryCalendarRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
@@ -59,14 +61,14 @@ class DiaryCalendarViewModel @Inject constructor(
         }
 
 
-    private val queryFlowState: Flow<Map<Int, DiaryCalendarEntityWithQueryResult?>> = uiState.flatMapLatest {
-            state -> diaryCalendarRepository.getDiaryCalendarByMonth(state.currentYearMonth.year,
-        state.currentYearMonth.monthValue - 1, state.query)
-    }.map {
-        it.groupBy { it.diaryCalendarEntity.day }.mapValues { if (it.value.size > 0) it.value[0] else null }
-    }.stateIn(scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(stopTimeoutMillis = 5000, replayExpirationMillis = 0),
-        initialValue = mapOf<Int, DiaryCalendarEntityWithQueryResult>())
+//    private val queryFlowState: Flow<Map<Int, DiaryCalendarEntityWithQueryResult?>> = uiState.flatMapLatest {
+//            state -> diaryCalendarRepository.getDiaryCalendarByMonth(state.currentYearMonth.year,
+//        state.currentYearMonth.monthValue - 1, state.query)
+//    }.map {
+//        it.groupBy { it.diaryCalendarEntity.day }.mapValues { if (it.value.size > 0) it.value[0] else null }
+//    }.stateIn(scope = viewModelScope,
+//        started = SharingStarted.WhileSubscribed(stopTimeoutMillis = 5000, replayExpirationMillis = 0),
+//        initialValue = mapOf<Int, DiaryCalendarEntityWithQueryResult>())
 
     fun setQuery(query: String?) {
         _query = query
@@ -76,9 +78,17 @@ class DiaryCalendarViewModel @Inject constructor(
         _currentYearMonth = currentYearMonth
     }
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     fun queryDiaryCalendarEntries(month: YearMonth): Flow<Map<Int, DiaryCalendarEntityWithQueryResult?>> {
-        _uiState.update { it.copy(currentYearMonth = month) }
-        return queryFlowState
+        //due to animation, we may have 2 active queries flow at the same time when the old month is sliding out
+        //   and the new month sliding in, so we return a separate flow every time
+        return uiState.map { it.query }.distinctUntilChanged().flatMapLatest { query ->
+            diaryCalendarRepository.getDiaryCalendarByMonth(month.year,
+                month.monthValue, query)
+        }.map {
+            it.groupBy { it.diaryCalendarEntity.day }
+                .mapValues { if (it.value.size > 0) it.value[0] else null }
+        }
     }
 
     fun saveDateImageUri(month: YearMonth, day: Int, uri: Uri?) {
