@@ -54,6 +54,7 @@ import com.andsoftapps.viewmodel.DiaryCalendarViewModel
 import java.time.YearMonth
 
 private val SCREEN_SLIDE_ANIM_DURATION_MILLIS = 1000
+private val BOTTOM_SHEET_HEIGHT = 130.dp
 
 @Composable
 fun DiaryCalendarScreen(viewModel: DiaryCalendarViewModel = hiltViewModel()) {
@@ -97,7 +98,7 @@ fun DiaryCalendar(month: () -> YearMonth, monthChangeCallback: (YearMonth) -> Un
         scaffoldState = scaffoldState,
         sheetPeekHeight = 50.dp,
         sheetContent = {
-
+            DiaryCalendarBottomSheetNavigation(month, monthChangeCallback)
         }
     ) { innerPadding ->
         DiaryCalendarLayout(month, monthChangeCallback)
@@ -205,5 +206,15 @@ fun LazyGridScope.DiaryCalendarContent(month: YearMonth) {
             modifier = Modifier.background(color = Color.Black)
             )
     }
+
+}
+
+@Composable
+fun DiaryCalendarBottomSheetNavigation(monthLambda: () -> YearMonth,
+                                       monthChangeCallback: ((YearMonth) -> Unit)?) {
+
+    val modifier = Modifier.fillMaxWidth().height(BOTTOM_SHEET_HEIGHT)
+
+    Box(modifier.background(color = Color.Green))
 
 }
