@@ -40,6 +40,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.PointerInputChange
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
@@ -47,6 +48,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.andsoftapps.navigation.Route
 import com.andsoftapps.utils.ValueHolder
+import com.andsoftapps.utils.YEAR_MONTH_FORMATED_STRING
 import com.andsoftapps.utils.plus
 import com.andsoftapps.viewmodel.DiaryCalendarViewModel
 import java.time.YearMonth
@@ -68,7 +70,7 @@ fun DiaryCalendarScreen(viewModel: DiaryCalendarViewModel = hiltViewModel()) {
 
             composable(Route.Home.route) { from ->
 
-                DiaryCalendar(month = uiState.value.currentYearMonth,
+                DiaryCalendar(month = { uiState.value.currentYearMonth },
                     monthChangeCallback = viewModel::setCurrentYearMonth
                     )
 
@@ -80,7 +82,9 @@ fun DiaryCalendarScreen(viewModel: DiaryCalendarViewModel = hiltViewModel()) {
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun DiaryCalendar(month: YearMonth, monthChangeCallback: (YearMonth) -> Unit) {
+fun DiaryCalendar(month: () -> YearMonth, monthChangeCallback: (YearMonth) -> Unit) {
+    //this article explains why passing lambda and not actual value improve performance
+    // https://developer.android.com/jetpack/compose/performance/bestpractices#defer-reads
 
     LocalHideShowActionBar.current(false)
 
@@ -102,9 +106,11 @@ fun DiaryCalendar(month: YearMonth, monthChangeCallback: (YearMonth) -> Unit) {
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
-fun DiaryCalendarLayout(month: YearMonth, monthChangeCallback: ((YearMonth) -> Unit)? = null) {
+fun DiaryCalendarLayout(monthLambda: () -> YearMonth, monthChangeCallback: ((YearMonth) -> Unit)? = null) {
 
     val lazyVerticalGridState = rememberLazyGridState()
+
+    val month = monthLambda()
 
     //don't need to use mutableStateOf because we don't need this to
     // cause re-compose, we just use this to remember previous value
@@ -122,7 +128,7 @@ fun DiaryCalendarLayout(month: YearMonth, monthChangeCallback: ((YearMonth) -> U
     //direction of user's gesture
     var dragDirection by remember { mutableStateOf(0) }
 
-    //animate slide left/right
+    //animate sliding left/right
     AnimatedContent(
         targetState = month,
         transitionSpec = {
@@ -132,9 +138,9 @@ fun DiaryCalendarLayout(month: YearMonth, monthChangeCallback: ((YearMonth) -> U
                     slideOutHorizontally (animationSpec = tween(SCREEN_SLIDE_ANIM_DURATION_MILLIS),
                         targetOffsetX = { fullWidth -> -1 * slideDirection.value!! * fullWidth })
         }
-        ) { month ->
+        ) { monthTarget ->
 
-        val mapMonthEntities by LocalQueryDairyEntries.current(month).collectAsState(emptyMap())
+        val mapMonthEntities by LocalQueryDairyEntries.current(monthTarget).collectAsState(emptyMap())
 
         CompositionLocalProvider(LocalDiaryEntities provides mapMonthEntities) {
             Column(modifier = Modifier.pointerInput(Unit) {
@@ -147,7 +153,7 @@ fun DiaryCalendarLayout(month: YearMonth, monthChangeCallback: ((YearMonth) -> U
 
                     onDragEnd = {
                         if (dragDirection != 0) {
-                            monthChangeCallback?.invoke(month + dragDirection)
+                            monthChangeCallback?.invoke(monthTarget + dragDirection)
                             dragDirection = 0
                         }
                     }
@@ -168,7 +174,7 @@ fun DiaryCalendarLayout(month: YearMonth, monthChangeCallback: ((YearMonth) -> U
 
                         ) {
 
-                        DiaryCalendarContent(month)
+                        DiaryCalendarContent(monthTarget)
 
                     }
                 }
@@ -192,9 +198,10 @@ fun LazyGridScope.DiaryCalendarContent(month: YearMonth) {
 
     //header
     item(span = {  GridItemSpan(maxLineSpan) }) {
-        Text(text = month.toString(),
+        Text(text = month.format(YEAR_MONTH_FORMATED_STRING),
             color = Color.White,
-            style = MaterialTheme.typography.h4,
+            style = MaterialTheme.typography.h5,
+            textAlign = TextAlign.Center,
             modifier = Modifier.background(color = Color.Black)
             )
     }
