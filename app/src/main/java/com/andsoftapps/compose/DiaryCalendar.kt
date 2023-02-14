@@ -7,12 +7,25 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.with
+import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
+import androidx.compose.foundation.lazy.grid.LazyGridScope
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.material.BottomSheetScaffold
 import androidx.compose.material.BottomSheetValue
 import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Text
 import androidx.compose.material.rememberBottomSheetScaffoldState
 import androidx.compose.material.rememberBottomSheetState
 import androidx.compose.runtime.Composable
@@ -24,6 +37,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.PointerInputChange
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
@@ -37,7 +51,7 @@ import com.andsoftapps.utils.plus
 import com.andsoftapps.viewmodel.DiaryCalendarViewModel
 import java.time.YearMonth
 
-private val SCREEN_SLIDE_DURATION_MILLIS = 1000
+private val SCREEN_SLIDE_ANIM_DURATION_MILLIS = 1000
 
 @Composable
 fun DiaryCalendarScreen(viewModel: DiaryCalendarViewModel = hiltViewModel()) {
@@ -54,7 +68,9 @@ fun DiaryCalendarScreen(viewModel: DiaryCalendarViewModel = hiltViewModel()) {
 
             composable(Route.Home.route) { from ->
 
-                DiaryCalendar()
+                DiaryCalendar(month = uiState.value.currentYearMonth,
+                    monthChangeCallback = viewModel::setCurrentYearMonth
+                    )
 
             }
 
@@ -64,7 +80,7 @@ fun DiaryCalendarScreen(viewModel: DiaryCalendarViewModel = hiltViewModel()) {
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun DiaryCalendar() {
+fun DiaryCalendar(month: YearMonth, monthChangeCallback: (YearMonth) -> Unit) {
 
     LocalHideShowActionBar.current(false)
 
@@ -80,7 +96,7 @@ fun DiaryCalendar() {
 
         }
     ) { innerPadding ->
-
+        DiaryCalendarLayout(month, monthChangeCallback)
     }
 }
 
@@ -90,6 +106,8 @@ fun DiaryCalendarLayout(month: YearMonth, monthChangeCallback: ((YearMonth) -> U
 
     val lazyVerticalGridState = rememberLazyGridState()
 
+    //don't need to use mutableStateOf because we don't need this to
+    // cause re-compose, we just use this to remember previous value
     val previousMonthHolder = remember { ValueHolder<YearMonth>(month) }
     //slide the screen left or right depends on user's gesture
     val slideDirection = remember { ValueHolder<Int?>(null) }
@@ -109,9 +127,9 @@ fun DiaryCalendarLayout(month: YearMonth, monthChangeCallback: ((YearMonth) -> U
         targetState = month,
         transitionSpec = {
             fadeIn() + slideInHorizontally(
-                animationSpec = tween(SCREEN_SLIDE_DURATION_MILLIS),
+                animationSpec = tween(SCREEN_SLIDE_ANIM_DURATION_MILLIS),
                 initialOffsetX = { fullWidth -> slideDirection.value!! * fullWidth }) with
-                    slideOutHorizontally (animationSpec = tween(SCREEN_SLIDE_DURATION_MILLIS),
+                    slideOutHorizontally (animationSpec = tween(SCREEN_SLIDE_ANIM_DURATION_MILLIS),
                         targetOffsetX = { fullWidth -> -1 * slideDirection.value!! * fullWidth })
         }
         ) { month ->
@@ -123,9 +141,7 @@ fun DiaryCalendarLayout(month: YearMonth, monthChangeCallback: ((YearMonth) -> U
                 detectDragGestures(
                     onDrag = { change: PointerInputChange, dragAmount: Offset ->
                         val (x, _) = dragAmount
-
                         dragDirection = if (x > 0) -1 else if (x < 0) 1 else 0
-
                         change.consume()
                     },
 
@@ -139,8 +155,48 @@ fun DiaryCalendarLayout(month: YearMonth, monthChangeCallback: ((YearMonth) -> U
                 )
             }) {
 
+                Row(Modifier.weight(1f, true)) {
+                    LazyVerticalGrid(
+                        columns = GridCells.Fixed(7),
+                        verticalArrangement = Arrangement.spacedBy(1.dp),
+                        horizontalArrangement = Arrangement.spacedBy(1.dp),
+                        state = lazyVerticalGridState,
+//                        contentPadding = PaddingValues(
+//                            start = 3.dp,
+//                            end = 3.dp
+//                        ),
+
+                        ) {
+
+                        DiaryCalendarContent(month)
+
+                    }
+                }
+
+                Row {
+                    Box(
+                        Modifier
+                            .height(50.dp)
+                            .fillMaxWidth()
+                            .background(color = Color.DarkGray)
+                    )
+                }
+
             }
         }
+    }
+
+}
+
+fun LazyGridScope.DiaryCalendarContent(month: YearMonth) {
+
+    //header
+    item(span = {  GridItemSpan(maxLineSpan) }) {
+        Text(text = month.toString(),
+            color = Color.White,
+            style = MaterialTheme.typography.h4,
+            modifier = Modifier.background(color = Color.Black)
+            )
     }
 
 }
