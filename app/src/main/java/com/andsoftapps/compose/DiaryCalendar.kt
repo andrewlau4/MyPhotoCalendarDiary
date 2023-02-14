@@ -3,6 +3,8 @@ package com.andsoftapps.compose
 import android.app.Activity
 import android.content.Intent
 import android.net.Uri
+import android.os.Build
+import android.provider.MediaStore
 import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -36,6 +38,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.BottomSheetScaffold
 import androidx.compose.material.BottomSheetValue
 import androidx.compose.material.Card
+import androidx.compose.material.DropdownMenu
+import androidx.compose.material.DropdownMenuItem
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
@@ -202,11 +206,6 @@ fun DiaryCalendarLayout(monthLambda: () -> YearMonth, monthChangeCallback: ((Yea
                         verticalArrangement = Arrangement.spacedBy(1.dp),
                         horizontalArrangement = Arrangement.spacedBy(1.dp),
                         state = lazyVerticalGridState,
-//                        contentPadding = PaddingValues(
-//                            start = 3.dp,
-//                            end = 3.dp
-//                        ),
-
                         ) {
 
                         DiaryCalendarContent(monthTarget, firstDayOfWeek,
@@ -325,6 +324,44 @@ fun DayBox(dayInMonth: Int?, month: YearMonth) {
                 DayIcon(Modifier.align(Alignment.TopStart), dayInMonth.toString())
             }
 
+            dayInMonth?.apply {
+                DropdownMenu(
+                    expanded = expanded,
+                    onDismissRequest = { expanded = false }
+                ) {
+                    val navigationCallback = LocalNavigation.current
+
+                    DropdownMenuItem(
+                        onClick = {
+                            val pickImagesIntent = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                                Intent(MediaStore.ACTION_PICK_IMAGES).apply {
+                                    type = "image/*"
+                                    putExtra(MediaStore.EXTRA_PICK_IMAGES_MAX, 2) // deafult is 1
+                                }
+                            } else {
+                                Intent(Intent.ACTION_OPEN_DOCUMENT, null).apply {
+                                    type = "image/*"
+                                }
+                            }
+
+                            getContentLauncher.launch(pickImagesIntent)
+
+                            expanded = false
+                        }
+                    ) {
+                        Text("Pick Photo")
+                    }
+
+                    DropdownMenuItem(onClick = {
+                        println("DropdownMenuItem Daily Detail ${dayInMonth}")
+
+                        navigationCallback(Route.Detail.createRoute(month, dayInMonth))
+
+                    }) {
+                        Text("Daily Detail")
+                    }
+                }
+            }
         }
     }
 
