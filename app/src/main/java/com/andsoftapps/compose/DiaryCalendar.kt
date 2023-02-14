@@ -49,8 +49,11 @@ import androidx.navigation.compose.rememberNavController
 import com.andsoftapps.navigation.Route
 import com.andsoftapps.utils.ValueHolder
 import com.andsoftapps.utils.YEAR_MONTH_FORMATED_STRING
+import com.andsoftapps.utils.firstDayOfWeek
 import com.andsoftapps.utils.plus
+import com.andsoftapps.utils.totalDaysInMonthPlusLeftOver
 import com.andsoftapps.viewmodel.DiaryCalendarViewModel
+import java.time.DayOfWeek
 import java.time.YearMonth
 
 private val SCREEN_SLIDE_ANIM_DURATION_MILLIS = 1000
@@ -72,8 +75,7 @@ fun DiaryCalendarScreen(viewModel: DiaryCalendarViewModel = hiltViewModel()) {
             composable(Route.Home.route) { from ->
 
                 DiaryCalendar(month = { uiState.value.currentYearMonth },
-                    monthChangeCallback = viewModel::setCurrentYearMonth
-                    )
+                    monthChangeCallback = viewModel::setCurrentYearMonth)
 
             }
 
@@ -163,6 +165,15 @@ fun DiaryCalendarLayout(monthLambda: () -> YearMonth, monthChangeCallback: ((Yea
             }) {
 
                 Row(Modifier.weight(1f, true)) {
+
+                    //these values are derived from YearMonth and won't change as long
+                    // as the YearMonth doesn't change, so they need not be MutableState
+                    val firstDayOfWeek = remember(monthTarget) {
+                        monthTarget.firstDayOfWeek }
+                    val totalDaysInMonthPlusLeftOver = remember(monthTarget) {
+                        monthTarget.totalDaysInMonthPlusLeftOver
+                    }
+
                     LazyVerticalGrid(
                         columns = GridCells.Fixed(7),
                         verticalArrangement = Arrangement.spacedBy(1.dp),
@@ -175,7 +186,8 @@ fun DiaryCalendarLayout(monthLambda: () -> YearMonth, monthChangeCallback: ((Yea
 
                         ) {
 
-                        DiaryCalendarContent(monthTarget)
+                        DiaryCalendarContent(monthTarget, firstDayOfWeek,
+                            totalDaysInMonthPlusLeftOver)
 
                     }
                 }
@@ -195,8 +207,8 @@ fun DiaryCalendarLayout(monthLambda: () -> YearMonth, monthChangeCallback: ((Yea
 
 }
 
-fun LazyGridScope.DiaryCalendarContent(month: YearMonth) {
 
+fun LazyGridScope.DiaryCalendarContent(month: YearMonth, firstDayOfWeek: Int, totalDaysInMonth: Int) {
     //header
     item(span = {  GridItemSpan(maxLineSpan) }) {
         Text(text = month.format(YEAR_MONTH_FORMATED_STRING),
@@ -207,6 +219,22 @@ fun LazyGridScope.DiaryCalendarContent(month: YearMonth) {
             )
     }
 
+    items(7) {
+        index ->
+        Text(text = DayOfWeek.of((index + 7) % 8).,
+            color = Color.White,
+            style = MaterialTheme.typography.h5,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.background(color = Color.Black)
+        )
+    }
+
+    items(totalDaysInMonth,
+        key = { index ->
+            "${month.year}-${index}"
+        }) {
+
+    }
 }
 
 @Composable
