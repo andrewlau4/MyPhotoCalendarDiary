@@ -25,9 +25,11 @@ import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyGridScope
@@ -41,8 +43,12 @@ import androidx.compose.material.Card
 import androidx.compose.material.DropdownMenu
 import androidx.compose.material.DropdownMenuItem
 import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Face
 import androidx.compose.material.rememberBottomSheetScaffoldState
 import androidx.compose.material.rememberBottomSheetState
 import androidx.compose.runtime.Composable
@@ -349,16 +355,18 @@ fun DayBox(dayInMonth: Int?, month: YearMonth) {
                             expanded = false
                         }
                     ) {
+                        Icon(imageVector = Icons.Filled.Face, contentDescription = "Pick Photos Menu Item")
+                        Spacer(modifier = Modifier.width(1.dp))
                         Text("Pick Photo")
                     }
 
                     DropdownMenuItem(onClick = {
-                        println("DropdownMenuItem Daily Detail ${dayInMonth}")
-
                         navigationCallback(Route.Detail.createRoute(month, dayInMonth))
-
                     }) {
-                        Text("Daily Detail")
+
+                        Icon(imageVector = Icons.Filled.Edit, contentDescription = "Edit Diary")
+                        Spacer(modifier = Modifier.width(1.dp))
+                        Text("Diary Detail")
                     }
                 }
             }
