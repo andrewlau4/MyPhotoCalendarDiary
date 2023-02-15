@@ -74,6 +74,7 @@ fun PulsateButton(onClick: () -> Unit, brush: Brush,
 
 @Composable
 fun PulsateButton(onClick: () -> Unit,
+                  brush: Brush,
                   imageVector: ImageVector, contentDescription: String,
                   modifier: Modifier
 ) {
@@ -82,6 +83,7 @@ fun PulsateButton(onClick: () -> Unit,
         .bounceClick(onClick)
         .size(30.dp)
         .clip(CircleShape)
+        .background(brush = brush)
         .then(modifier)
     ) {
         Image(modifier = Modifier.align(Alignment.Center),

@@ -35,6 +35,7 @@ fun ComposeDiaryCalendarLocalProviders(viewModel: DiaryCalendarViewModel,
     CompositionLocalProvider(
         LocalSaveImgPath provides {
             yearAndMonth, day, uri ->
+            viewModel.saveDateImageUri(yearAndMonth, day, uri)
         },
 
         LocalQueryDairyEntries provides {

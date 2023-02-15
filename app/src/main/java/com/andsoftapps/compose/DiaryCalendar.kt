@@ -81,6 +81,7 @@ import androidx.navigation.compose.rememberNavController
 import coil.compose.AsyncImage
 import com.andsoftapps.R
 import com.andsoftapps.navigation.Route
+import com.andsoftapps.ui.theme.NavigationButtonBrush
 import com.andsoftapps.utils.ValueHolder
 import com.andsoftapps.utils.YEAR_MONTH_FORMATED_STRING
 import com.andsoftapps.utils.firstDayOfWeek
@@ -154,19 +155,6 @@ fun DiaryCalendarLayout(monthLambda: () -> YearMonth, monthChangeCallback: ((Yea
 
     val month = monthLambda()
 
-    //don't need to use mutableStateOf because we don't need this to
-    // cause re-compose, we just use this to remember previous value
-    val previousMonthHolder = remember { ValueHolder<YearMonth>(month) }
-    //slide the screen left or right depends on user's gesture
-    val slideDirection = remember { ValueHolder<Int?>(null) }
-
-    // if previousMonthHolder equals this month, this is likely a re-compose due to
-    // animation or other reasons, so don't change the slideDirection
-    if (slideDirection.value == null || previousMonthHolder.value !== month) {
-        slideDirection.value = if (previousMonthHolder.value!! <= month) 1 else -1
-        previousMonthHolder.value = month
-    }
-
     //direction of user's gesture
     var dragDirection by remember { mutableStateOf(0) }
 
@@ -174,13 +162,18 @@ fun DiaryCalendarLayout(monthLambda: () -> YearMonth, monthChangeCallback: ((Yea
     AnimatedContent(
         targetState = month,
         transitionSpec = {
+            //https://developer.android.com/jetpack/compose/animation#animatedcontent
+            val slideDir = if (initialState <= targetState) 1 else -1
             fadeIn() + slideInHorizontally(
                 animationSpec = tween(SCREEN_SLIDE_ANIM_DURATION_MILLIS),
-                initialOffsetX = { fullWidth -> slideDirection.value!! * fullWidth }) with
+                initialOffsetX = { fullWidth -> slideDir!! * fullWidth }) with
                     slideOutHorizontally (animationSpec = tween(SCREEN_SLIDE_ANIM_DURATION_MILLIS),
-                        targetOffsetX = { fullWidth -> -1 * slideDirection.value!! * fullWidth })
+                        targetOffsetX = { fullWidth -> -1 * slideDir * fullWidth })
         }
         ) { monthTarget ->
+
+        val monthTargetState = transition.targetState
+        val monthCurrentState = transition.currentState
 
         val mapMonthEntities by LocalQueryDairyEntries.current(monthTarget).collectAsState(emptyMap())
 
@@ -378,7 +371,6 @@ fun DayBox(dayInMonth: Int?, month: YearMonth) {
             }
         }
     }
-
 }
 
 @Composable
@@ -429,6 +421,7 @@ fun DiaryCalendarBottomSheetNavigation(monthLambda: () -> YearMonth,
         PulsateButton(
             onClick = {
                 monthChangeCallback?.invoke(month - 1) },
+            brush = NavigationButtonBrush,
             imageVector = Icons.Default.ArrowBack,
             contentDescription = "Back Button",
             modifier = Modifier.constrainAs(backButton) {
@@ -439,6 +432,7 @@ fun DiaryCalendarBottomSheetNavigation(monthLambda: () -> YearMonth,
         PulsateButton(
             onClick = {
                 monthChangeCallback?.invoke(month + 1) },
+            brush = NavigationButtonBrush,
             imageVector = Icons.Default.ArrowForward,
             contentDescription = "Forward Button",
             modifier = Modifier.constrainAs(forwardButton) {
@@ -447,6 +441,7 @@ fun DiaryCalendarBottomSheetNavigation(monthLambda: () -> YearMonth,
             })
 
         PulsateButton(onClick = { },
+            brush = NavigationButtonBrush,
             imageVector = Icons.Default.ArrowDropDown,
             contentDescription = "Up Button",
             modifier = Modifier.constrainAs(upButton) {
