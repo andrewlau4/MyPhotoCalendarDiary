@@ -243,7 +243,6 @@ fun DiaryCalendarLayout(monthLambda: () -> YearMonth, monthChangeCallback: ((Yea
                         Modifier
                             .height(50.dp)
                             .fillMaxWidth()
-                            .background(color = Color.DarkGray)
                     )
                 }
 
@@ -306,7 +305,7 @@ fun DayBox(dayInMonth: Int?, month: YearMonth) {
     val dayImage = LocalDiaryEntities.current[dayInMonth]?.diaryCalendarEntity?.imagePath
     val context = LocalContext.current
     val saveImgCallBack = LocalSaveImgPath.current
-    var launchResultUri by remember { mutableStateOf<Uri?>( dayImage?.let { Uri.parse(it) }) }
+    var launchResultUri by remember(dayImage) { mutableStateOf<Uri?>( dayImage?.let { Uri.parse(it) }) }
     val getContentLauncher =
         rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             result?.let { nonNullableResult ->
