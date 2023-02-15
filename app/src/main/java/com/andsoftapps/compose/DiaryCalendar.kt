@@ -60,6 +60,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -67,6 +68,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.PointerInputChange
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
@@ -89,6 +91,7 @@ import com.andsoftapps.utils.plus
 import com.andsoftapps.utils.minus
 import com.andsoftapps.utils.totalDaysInMonthPlusLeftOver
 import com.andsoftapps.viewmodel.DiaryCalendarViewModel
+import kotlinx.coroutines.launch
 import java.time.DayOfWeek
 import java.time.YearMonth
 
@@ -131,16 +134,32 @@ fun DiaryCalendar(month: () -> YearMonth, monthChangeCallback: (YearMonth) -> Un
 
     LocalHideShowActionBar.current(false)
 
+    val bottomSheetExpandState = rememberBottomSheetState(
+        initialValue = BottomSheetValue.Collapsed)
+
     val scaffoldState = rememberBottomSheetScaffoldState(
-        bottomSheetState = rememberBottomSheetState(
-            initialValue = BottomSheetValue.Collapsed)
+        bottomSheetState = bottomSheetExpandState
     )
+
+    val coroutineScope = rememberCoroutineScope()
 
     BottomSheetScaffold(
         scaffoldState = scaffoldState,
         sheetPeekHeight = 50.dp,
         sheetContent = {
-            DiaryCalendarBottomSheetNavigation(month, monthChangeCallback)
+            DiaryCalendarBottomSheetNavigation(
+                monthLambda = month,
+                monthChangeCallback = monthChangeCallback,
+                isBottomSheetExpanded = { bottomSheetExpandState.isExpanded },
+                toggleExpandedCallback = {
+                    coroutineScope.launch {
+                        if (bottomSheetExpandState.isCollapsed)
+                            bottomSheetExpandState.expand()
+                        else
+                            bottomSheetExpandState.collapse()
+                    }
+                }
+            )
         }
     ) { innerPadding ->
         DiaryCalendarLayout(month, monthChangeCallback)
@@ -313,7 +332,9 @@ fun DayBox(dayInMonth: Int?, month: YearMonth) {
 
     Card(
         shape = RoundedCornerShape(3.dp),
-        modifier = Modifier.fillMaxWidth().height(DAY_BOX_HEIGHT)
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(DAY_BOX_HEIGHT)
             .clickable {
                 if (dayInMonth != null) {
                     expanded = true
@@ -329,7 +350,6 @@ fun DayBox(dayInMonth: Int?, month: YearMonth) {
                     contentScale = ContentScale.Crop,
                     modifier = Modifier
                         .size(200.dp, 200.dp)
-                    //.clip(CircleShape)
                 )
             }
 
@@ -388,7 +408,8 @@ fun BoxScope.CalendarIconBackground(modifier: Modifier = Modifier,
     Box (modifier = modifier
         .clip(CircleShape)
         .background(
-            brush = brush),
+            brush = brush
+        ),
         content = content
     )
 }
@@ -411,18 +432,25 @@ fun BoxScope.DayIcon(modifier: Modifier = Modifier, text: String) {
 
 @Composable
 fun DiaryCalendarBottomSheetNavigation(monthLambda: () -> YearMonth,
-                                       monthChangeCallback: ((YearMonth) -> Unit)?) {
+                                       monthChangeCallback: ((YearMonth) -> Unit)? = null,
+                                       isBottomSheetExpanded: (() -> Boolean)? = null,
+                                       toggleExpandedCallback: (() -> Unit)? = null
+) {
 
     ConstraintLayout(modifier = Modifier
         .fillMaxWidth()
         .height(BOTTOM_SHEET_HEIGHT)
-        .clip(shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp,
-            bottomStart = 0.dp, bottomEnd = 0.dp) )
+        .clip(
+            shape = RoundedCornerShape(
+                topStart = 20.dp, topEnd = 20.dp,
+                bottomStart = 0.dp, bottomEnd = 0.dp
+            )
+        )
         .background(
             color = MaterialTheme.colors.primary
         )
     ) {
-        val (backButton, forwardButton, upButton, monthSelectorDropdown) = createRefs()
+        val (backButton, forwardButton, upButton) = createRefs()
 
         val month = monthLambda()
 
@@ -432,7 +460,7 @@ fun DiaryCalendarBottomSheetNavigation(monthLambda: () -> YearMonth,
             brush = NavigationButtonBrush,
             imageVector = Icons.Default.ArrowBack,
             contentDescription = "Back Button",
-            modifier = Modifier.constrainAs(backButton) {
+            boxModifier = Modifier.constrainAs(backButton) {
                 top.linkTo(parent.top, margin = 12.dp)
                 start.linkTo(parent.absoluteLeft, margin = 12.dp)
             })
@@ -443,19 +471,25 @@ fun DiaryCalendarBottomSheetNavigation(monthLambda: () -> YearMonth,
             brush = NavigationButtonBrush,
             imageVector = Icons.Default.ArrowForward,
             contentDescription = "Forward Button",
-            modifier = Modifier.constrainAs(forwardButton) {
+            boxModifier = Modifier.constrainAs(forwardButton) {
                 top.linkTo(parent.top, margin = 12.dp)
                 end.linkTo(parent.absoluteRight, margin = 12.dp)
             })
 
-        PulsateButton(onClick = { },
+        PulsateButton(onClick = { toggleExpandedCallback?.invoke() },
             brush = NavigationButtonBrush,
             imageVector = Icons.Default.ArrowDropDown,
             contentDescription = "Up Button",
-            modifier = Modifier.constrainAs(upButton) {
+            boxModifier = Modifier.constrainAs(upButton) {
                 top.linkTo(parent.top, margin = 12.dp)
                 absoluteLeft.linkTo(backButton.absoluteRight, margin = 12.dp)
                 absoluteRight.linkTo(forwardButton.absoluteLeft, margin = 12.dp)
-            })
+            },
+            imageModifier = Modifier.graphicsLayer {
+                if (isBottomSheetExpanded?.invoke() == false) {
+                    rotationZ = 180f
+                }
+            }
+            )
     }
 }

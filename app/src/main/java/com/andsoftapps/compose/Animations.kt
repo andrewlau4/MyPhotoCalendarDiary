@@ -52,7 +52,8 @@ fun Modifier.bounceClick(onClick: () -> Unit) = composed {
 @Composable
 fun PulsateButton(onClick: () -> Unit, brush: Brush,
                   @DrawableRes backgroundDrawableId: Int, contentDescription: String,
-                  modifier: Modifier
+                  boxModifier: Modifier = Modifier,
+                  imageModifier: Modifier = Modifier
 ) {
 
     Box (modifier = Modifier
@@ -62,9 +63,9 @@ fun PulsateButton(onClick: () -> Unit, brush: Brush,
         .background(
             brush = brush
         )
-        .then(modifier)
+        .then(boxModifier)
     ) {
-        Image(modifier = Modifier.align(Alignment.Center),
+        Image(modifier = imageModifier.align(Alignment.Center),
             contentDescription = contentDescription,
             painter = painterResource(id = backgroundDrawableId),
             colorFilter = ColorFilter.tint(Color.White)
@@ -76,7 +77,8 @@ fun PulsateButton(onClick: () -> Unit, brush: Brush,
 fun PulsateButton(onClick: () -> Unit,
                   brush: Brush,
                   imageVector: ImageVector, contentDescription: String,
-                  modifier: Modifier
+                  boxModifier: Modifier = Modifier,
+                  imageModifier: Modifier = Modifier
 ) {
 
     Box (modifier = Modifier
@@ -84,9 +86,9 @@ fun PulsateButton(onClick: () -> Unit,
         .size(30.dp)
         .clip(CircleShape)
         .background(brush = brush)
-        .then(modifier)
+        .then(boxModifier)
     ) {
-        Image(modifier = Modifier.align(Alignment.Center),
+        Image(modifier = imageModifier.align(Alignment.Center),
             contentDescription = contentDescription,
             imageVector = imageVector,
             colorFilter = ColorFilter.tint(Color.White)
