@@ -451,7 +451,7 @@ fun DiaryCalendarBottomSheetNavigation(monthLambda: () -> YearMonth,
             color = MaterialTheme.colors.primary
         )
     ) {
-        val (backButton, forwardButton, upButton) = createRefs()
+        val (backButton, forwardButton, upButton, monthSelectorDropdown) = createRefs()
 
         val month = monthLambda()
 
@@ -492,5 +492,15 @@ fun DiaryCalendarBottomSheetNavigation(monthLambda: () -> YearMonth,
             imageModifier = Modifier.graphicsLayer {
                 rotationZ = rotationZValue }
         )
+
+        AndroidViewMonthSelector(month,
+            modifier = Modifier.constrainAs(monthSelectorDropdown) {
+                top.linkTo(upButton.bottom, margin = 1.dp)
+                absoluteLeft.linkTo(parent.absoluteLeft, margin = 12.dp)
+                absoluteRight.linkTo(parent.absoluteRight, margin = 12.dp)
+            }
+        ) { newMonth ->
+            monthChangeCallback?.invoke(newMonth)
+        }
     }
 }
