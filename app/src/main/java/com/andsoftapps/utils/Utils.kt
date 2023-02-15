@@ -11,6 +11,9 @@ data class ValueHolder<T>(var value: T?)
 operator fun YearMonth.plus(monthToAdd: Int): YearMonth {
     return plusMonths(monthToAdd.toLong())
 }
+operator fun YearMonth.minus(monthToMinus: Int): YearMonth {
+    return plusMonths(-1 * monthToMinus.toLong())
+}
 
 val YearMonth.firstDayOfWeek
     get() = atDay(1).dayOfWeek.value % 7

@@ -47,6 +47,9 @@ import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Face
 import androidx.compose.material.rememberBottomSheetScaffoldState
@@ -70,16 +73,19 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import coil.compose.AsyncImage
+import com.andsoftapps.R
 import com.andsoftapps.navigation.Route
 import com.andsoftapps.utils.ValueHolder
 import com.andsoftapps.utils.YEAR_MONTH_FORMATED_STRING
 import com.andsoftapps.utils.firstDayOfWeek
 import com.andsoftapps.utils.plus
+import com.andsoftapps.utils.minus
 import com.andsoftapps.utils.totalDaysInMonthPlusLeftOver
 import com.andsoftapps.viewmodel.DiaryCalendarViewModel
 import java.time.DayOfWeek
@@ -407,8 +413,46 @@ fun BoxScope.DayIcon(modifier: Modifier = Modifier, text: String) {
 fun DiaryCalendarBottomSheetNavigation(monthLambda: () -> YearMonth,
                                        monthChangeCallback: ((YearMonth) -> Unit)?) {
 
-    val modifier = Modifier.fillMaxWidth().height(BOTTOM_SHEET_HEIGHT)
+    ConstraintLayout(modifier = Modifier
+        .fillMaxWidth()
+        .height(BOTTOM_SHEET_HEIGHT)
+        .background(
+            color = MaterialTheme.colors.primary
+        )
+        .clip(shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp,
+            bottomStart = 0.dp, bottomEnd = 0.dp) )
+    ) {
+        val (backButton, forwardButton, upButton, monthSelectorDropdown) = createRefs()
 
-    Box(modifier.background(color = Color.Green))
+        val month = monthLambda()
 
+        PulsateButton(
+            onClick = {
+                monthChangeCallback?.invoke(month - 1) },
+            imageVector = Icons.Default.ArrowBack,
+            contentDescription = "Back Button",
+            modifier = Modifier.constrainAs(backButton) {
+                top.linkTo(parent.top, margin = 12.dp)
+                start.linkTo(parent.absoluteLeft, margin = 12.dp)
+            })
+
+        PulsateButton(
+            onClick = {
+                monthChangeCallback?.invoke(month + 1) },
+            imageVector = Icons.Default.ArrowForward,
+            contentDescription = "Forward Button",
+            modifier = Modifier.constrainAs(forwardButton) {
+                top.linkTo(parent.top, margin = 12.dp)
+                end.linkTo(parent.absoluteRight, margin = 12.dp)
+            })
+
+        PulsateButton(onClick = { },
+            imageVector = Icons.Default.ArrowDropDown,
+            contentDescription = "Up Button",
+            modifier = Modifier.constrainAs(upButton) {
+                top.linkTo(parent.top, margin = 12.dp)
+                absoluteLeft.linkTo(backButton.absoluteRight, margin = 12.dp)
+                absoluteRight.linkTo(forwardButton.absoluteLeft, margin = 12.dp)
+            })
+    }
 }
