@@ -166,14 +166,11 @@ fun DiaryCalendarLayout(monthLambda: () -> YearMonth, monthChangeCallback: ((Yea
             val slideDir = if (initialState <= targetState) 1 else -1
             fadeIn() + slideInHorizontally(
                 animationSpec = tween(SCREEN_SLIDE_ANIM_DURATION_MILLIS),
-                initialOffsetX = { fullWidth -> slideDir!! * fullWidth }) with
+                initialOffsetX = { fullWidth -> slideDir * fullWidth }) with
                     slideOutHorizontally (animationSpec = tween(SCREEN_SLIDE_ANIM_DURATION_MILLIS),
                         targetOffsetX = { fullWidth -> -1 * slideDir * fullWidth })
         }
         ) { monthTarget ->
-
-        val monthTargetState = transition.targetState
-        val monthCurrentState = transition.currentState
 
         val mapMonthEntities by LocalQueryDairyEntries.current(monthTarget).collectAsState(emptyMap())
 
@@ -212,10 +209,13 @@ fun DiaryCalendarLayout(monthLambda: () -> YearMonth, monthChangeCallback: ((Yea
                         horizontalArrangement = Arrangement.spacedBy(1.dp),
                         state = lazyVerticalGridState,
                         ) {
-
-                        DiaryCalendarContent(monthTarget, firstDayOfWeek,
-                            totalDaysInMonthPlusLeftOver)
-
+                            DiaryCalendarContent(
+                                month = monthTarget,
+                                firstDayOfWeek = firstDayOfWeek,
+                                totalDaysInMonth = totalDaysInMonthPlusLeftOver,
+                                ////https://developer.android.com/reference/kotlin/androidx/compose/animation/AnimatedVisibilityScope
+                                isSlideAnimationRunning = { transition.isRunning }
+                            )
                     }
                 }
 
@@ -235,7 +235,11 @@ fun DiaryCalendarLayout(monthLambda: () -> YearMonth, monthChangeCallback: ((Yea
 }
 
 
-fun LazyGridScope.DiaryCalendarContent(month: YearMonth, firstDayOfWeek: Int, totalDaysInMonth: Int) {
+fun LazyGridScope.DiaryCalendarContent(month: YearMonth,
+                                       firstDayOfWeek: Int,
+                                       totalDaysInMonth: Int,
+                                       isSlideAnimationRunning: () -> Boolean
+) {
     //header
     item(span = {  GridItemSpan(maxLineSpan) }) {
         Text(text = month.format(YEAR_MONTH_FORMATED_STRING),
@@ -246,28 +250,32 @@ fun LazyGridScope.DiaryCalendarContent(month: YearMonth, firstDayOfWeek: Int, to
             )
     }
 
-    items(7) {
-        index ->
-        Text(text = DayOfWeek.of(
-            when (index) {
-                0 -> 7
-                else -> index }).name[0].toString(),
-            color = Color.White,
-            style = MaterialTheme.typography.body1,
-            textAlign = TextAlign.Center,
-            modifier = Modifier.background(color = Color.Black)
-        )
-    }
 
-    items(totalDaysInMonth,
-        key = { index ->
-            "${month.year}-${index}"
-        }) { index ->
-        val dayInMonth = if (index >= firstDayOfWeek) { index - firstDayOfWeek + 1 }
-                            else null
+    if (!isSlideAnimationRunning()) {
+        items(7) {
+            index ->
+            Text(text = DayOfWeek.of(
+                when (index) {
+                    0 -> 7
+                    else -> index }).name[0].toString(),
+                color = Color.White,
+                style = MaterialTheme.typography.body1,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.background(color = Color.Black)
+            )
+        }
 
-        DayBox(dayInMonth, month)
+        items(totalDaysInMonth,
+            key = { index ->
+                "${month.year}-${index}"
+            }) { index ->
+            val dayInMonth = if (index >= firstDayOfWeek) {
+                index - firstDayOfWeek + 1
+            } else null
 
+            DayBox(dayInMonth, month)
+
+        }
     }
 }
 
