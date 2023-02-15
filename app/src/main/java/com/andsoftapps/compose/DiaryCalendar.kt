@@ -10,6 +10,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.slideInHorizontally
@@ -23,7 +24,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -269,14 +269,15 @@ fun LazyGridScope.DiaryCalendarContent(month: YearMonth,
             )
     }
 
-
     if (!isSlideAnimationRunning()) {
-        items(7) {
-            index ->
-            Text(text = DayOfWeek.of(
-                when (index) {
-                    0 -> 7
-                    else -> index }).name[0].toString(),
+        items(7) { index ->
+            Text(
+                text = DayOfWeek.of(
+                    when (index) {
+                        0 -> 7
+                        else -> index
+                    }
+                ).name[0].toString(),
                 color = Color.White,
                 style = MaterialTheme.typography.body1,
                 textAlign = TextAlign.Center,
@@ -293,9 +294,9 @@ fun LazyGridScope.DiaryCalendarContent(month: YearMonth,
             } else null
 
             DayBox(dayInMonth, month)
-
         }
     }
+
 }
 
 @Composable
@@ -476,6 +477,9 @@ fun DiaryCalendarBottomSheetNavigation(monthLambda: () -> YearMonth,
                 end.linkTo(parent.absoluteRight, margin = 12.dp)
             })
 
+        val rotationZValue: Float by animateFloatAsState(targetValue =
+            if (isBottomSheetExpanded?.invoke() == false) 180f else 0f )
+
         PulsateButton(onClick = { toggleExpandedCallback?.invoke() },
             brush = NavigationButtonBrush,
             imageVector = Icons.Default.ArrowDropDown,
@@ -486,10 +490,7 @@ fun DiaryCalendarBottomSheetNavigation(monthLambda: () -> YearMonth,
                 absoluteRight.linkTo(forwardButton.absoluteLeft, margin = 12.dp)
             },
             imageModifier = Modifier.graphicsLayer {
-                if (isBottomSheetExpanded?.invoke() == false) {
-                    rotationZ = 180f
-                }
-            }
-            )
+                rotationZ = rotationZValue }
+        )
     }
 }
