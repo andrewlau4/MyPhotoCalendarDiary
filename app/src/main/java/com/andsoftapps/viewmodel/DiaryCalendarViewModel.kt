@@ -60,16 +60,6 @@ class DiaryCalendarViewModel @Inject constructor(
             return savedStateHandle[CURRENT_YEARMONTH_KEY] ?: YearMonth.now()
         }
 
-
-//    private val queryFlowState: Flow<Map<Int, DiaryCalendarEntityWithQueryResult?>> = uiState.flatMapLatest {
-//            state -> diaryCalendarRepository.getDiaryCalendarByMonth(state.currentYearMonth.year,
-//        state.currentYearMonth.monthValue - 1, state.query)
-//    }.map {
-//        it.groupBy { it.diaryCalendarEntity.day }.mapValues { if (it.value.size > 0) it.value[0] else null }
-//    }.stateIn(scope = viewModelScope,
-//        started = SharingStarted.WhileSubscribed(stopTimeoutMillis = 5000, replayExpirationMillis = 0),
-//        initialValue = mapOf<Int, DiaryCalendarEntityWithQueryResult>())
-
     fun setQuery(query: String?) {
         _query = query
     }

@@ -6,7 +6,11 @@ import androidx.room.Room
 import com.andsoftapps.ApplicationIOScope
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 import java.time.YearMonth
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -19,6 +23,20 @@ class DiaryCalendarRepository
     @ApplicationContext context: Context,
     @ApplicationIOScope private val myCoroutineScope: CoroutineScope
 ) {
+
+    private val delaySaveFlow = MutableSharedFlow<Pair<Long, DiaryCalendarEntity>>();
+
+    init {
+        myCoroutineScope.launch {
+            delaySaveFlow.collectLatest {
+                (delayMillis, entity) ->
+                delay(delayMillis)
+                with (entity) {
+                    insertOrUpdate(year, month, day, userDiary)
+                }
+            }
+        }
+    }
 
     private val database: DiaryCalendarDatabase = Room
         .databaseBuilder(context.applicationContext,
@@ -46,4 +64,23 @@ class DiaryCalendarRepository
         return database.diaryCalendarDao().getDiaryCalendarByMonthWithQuery(year, month, queryString)
     }
 
+    suspend fun getDailyEntry(year: Int, month: Int, day: Int): DiaryCalendarEntity? {
+        return database.diaryCalendarDao().getDiaryCalendarByDate(year, month, day)
+    }
+
+    fun delaySaveUserNotes(delayMillis: Long = 2000, year: Int, month: Int, day: Int, userDiary: String?) {
+        myCoroutineScope.launch {
+            delaySaveFlow.emit(
+                Pair(
+                    delayMillis,
+                    DiaryCalendarEntity(
+                        year = year,
+                        month = month,
+                        day = day,
+                        userDiary = userDiary
+                    )
+                )
+            )
+        }
+    }
 }

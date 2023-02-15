@@ -42,7 +42,6 @@ interface DiaryCalendarDao {
             diaryCalendarEntity.imagePath = uri.toString()
         }
 
-        Log.d(TAG, "insertOrUpdate  month ${yearMonth.monthValue},   day  $day,   uri  $uri")
         insert(diaryCalendarEntity)
     }
 
@@ -54,9 +53,6 @@ interface DiaryCalendarDao {
             diaryCalendarEntity.userDiary = userDiary
         }
 
-        Log.d(TAG, "insertOrUpdate  month $month,   day  $day,   userNotes  $userDiary")
-        Log.d(TAG, "should replace  $diaryCalendarEntity")
         insert(diaryCalendarEntity)
-        Log.d(TAG, "finish insert  $diaryCalendarEntity")
     }
 }
