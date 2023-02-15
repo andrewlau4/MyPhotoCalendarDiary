@@ -408,11 +408,11 @@ fun DiaryCalendarBottomSheetNavigation(monthLambda: () -> YearMonth,
     ConstraintLayout(modifier = Modifier
         .fillMaxWidth()
         .height(BOTTOM_SHEET_HEIGHT)
+        .clip(shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp,
+            bottomStart = 0.dp, bottomEnd = 0.dp) )
         .background(
             color = MaterialTheme.colors.primary
         )
-        .clip(shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp,
-            bottomStart = 0.dp, bottomEnd = 0.dp) )
     ) {
         val (backButton, forwardButton, upButton, monthSelectorDropdown) = createRefs()
 
