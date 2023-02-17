@@ -37,7 +37,6 @@ fun Modifier.bounceClick(onClick: () -> Unit) = composed {
     )
 
     graphicsLayer {
-        println("bounceClickRevised scale  $scale")
         scaleX = scale
         scaleY = scale
     }
