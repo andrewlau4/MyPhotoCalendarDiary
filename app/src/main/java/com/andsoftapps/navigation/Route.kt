@@ -10,14 +10,14 @@ sealed class Route(val route: String) {
 
     object Detail: Route("DiaryDailyDetail/{date}") {
 
-        fun createRoute(date: Date) = "DailyDetail/${date.toString()}"
+        fun createRoute(date: Date) = "DiaryDailyDetail/${date.toString()}"
 
         fun createRoute(month: YearMonth, days: Int): String {
             fun Int.padZero(): String {
                 return toString().padStart(2, '0')
             }
 
-            return "DailyDetail/${"" + month.year + "-" + (month.monthValue).padZero() + "-" + days.padZero() }"
+            return "DiaryDailyDetail/${"" + month.year + "-" + (month.monthValue).padZero() + "-" + days.padZero() }"
         }
 
         fun retrieveFromRoute(date: String): Pair<YearMonth, Int> {
