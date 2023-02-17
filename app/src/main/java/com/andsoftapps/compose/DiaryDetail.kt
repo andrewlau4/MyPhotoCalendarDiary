@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -22,9 +23,14 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
 import androidx.compose.material.LocalContentColor
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Shapes
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.ArrowBack
+import androidx.compose.material.icons.outlined.ArrowForward
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -46,6 +52,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.drawscope.ContentDrawScope
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.LayoutCoordinates
@@ -55,6 +62,7 @@ import androidx.compose.ui.layout.positionInParent
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.PlatformTextStyle
@@ -67,6 +75,7 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.lerp
@@ -76,9 +85,12 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.andsoftapps.R
+import com.andsoftapps.ui.theme.NavigationButtonBrush
+import com.andsoftapps.ui.theme.Neutral0
 import com.andsoftapps.ui.theme.NotesLineColor
 import com.andsoftapps.ui.theme.NotesPageColor
 import com.andsoftapps.ui.theme.Ocean3
+import com.andsoftapps.ui.theme.RainbowColorsBrush
 import com.andsoftapps.ui.theme.Shadow4
 import com.andsoftapps.ui.theme.textSecondary
 import com.andsoftapps.ui.theme.uiBackground
@@ -104,6 +116,8 @@ private val HzPadding = Modifier.padding(horizontal = 24.dp)
 
 private val NumRows = 30
 
+//this layout and animation is based on jetpack comppose samples:
+//  https://github.com/android/compose-samples
 @Composable
 fun DiaryDetail(month: YearMonth,
                 day: Int,
@@ -135,6 +149,8 @@ fun DiaryDetail(month: YearMonth,
 
         DairyDetailImage(getImageUrl = { uiState.uri },
             scrollProvider = { scroll.value })
+
+        Up { navigationCallbackHandler(null)  }
 
     }
 }
@@ -359,7 +375,7 @@ fun NotepadTextField(
         modifier = Modifier.fillMaxSize(),
         value = userDiaryTextField(),
         onValueChange = userDiaryTextChangeCallback,
-        maxLines = NumRows,
+        maxLines = NumRows - 1,
         textStyle = TextStyle(color = Color.Black,
             fontWeight = FontWeight.Normal,
             fontSize = 4.em,
@@ -403,21 +419,6 @@ fun DairyDetailImage(
         collapseFractionProvider = collapseFractionProvider,
         modifier = HzPadding.then(Modifier.statusBarsPadding())
     ) {
-        val rainbowColorsBrush = remember {
-            Brush.sweepGradient(
-                listOf(
-                    Color(0xFF9575CD),
-                    Color(0xFFBA68C8),
-                    Color(0xFFE57373),
-                    Color(0xFFFFB74D),
-                    Color(0xFFFFF176),
-                    Color(0xFFAED581),
-                    Color(0xFF4DD0E1),
-                    Color(0xFF9575CD)
-                )
-            )
-        }
-
         val imageUrl = getImageUrl()
         if (imageUrl != null) {
             AsyncImage(
@@ -425,12 +426,12 @@ fun DairyDetailImage(
                     .data(imageUrl)
                     .crossfade(true)
                     .build(),
-                contentDescription = "my contentDescription",
+                contentDescription = "contentDescription",
                 //https://developer.android.com/jetpack/compose/graphics/images/customize
                 placeholder = painterResource(R.drawable.placeholder_image),
                 modifier = Modifier.fillMaxSize()
                     .border(
-                        BorderStroke(1.dp, rainbowColorsBrush),
+                        BorderStroke(1.dp, RainbowColorsBrush),
                         CircleShape
                     )
                     .padding(1.dp)
@@ -440,16 +441,8 @@ fun DairyDetailImage(
         } else {
             Image(
                 painter = painterResource(id = R.drawable.placeholder_image),
-                //https://developer.android.com/jetpack/compose/graphics/images/customize
-                modifier = Modifier.fillMaxSize()
-                    .border(
-                        BorderStroke(1.dp, rainbowColorsBrush),
-                        CircleShape
-                    )
-                    .padding(1.dp)
-                    .clip(CircleShape),
                 contentScale = ContentScale.Crop,
-                contentDescription = "my contentDescription",
+                contentDescription = "contentDescription",
             )
         }
 
@@ -492,3 +485,33 @@ private fun CollapsingImageLayout(
         }
     }
 }
+
+@Composable
+private fun Up(upPress: () -> Unit) {
+    IconButton(
+        onClick = upPress,
+        modifier = Modifier
+            .padding(horizontal = 16.dp, vertical = 10.dp)
+            .size(36.dp)
+            .background(
+                //color = NavigationButtonBrush, //Neutral8.copy(alpha = 0.32f),
+                brush = NavigationButtonBrush,
+                shape = CircleShape
+            )
+    ) {
+        Icon(
+            imageVector = mirroringBackIcon(),
+            tint = Neutral0,    // JetsnackTheme.colors.iconInteractive,
+            contentDescription = "Back" // stringResource(R.string.label_back)
+        )
+    }
+}
+
+@Composable
+fun mirroringBackIcon() = mirroringIcon(
+    ltrIcon = Icons.Outlined.ArrowBack, rtlIcon = Icons.Outlined.ArrowForward
+)
+
+@Composable
+fun mirroringIcon(ltrIcon: ImageVector, rtlIcon: ImageVector): ImageVector =
+    if (LocalLayoutDirection.current == LayoutDirection.Ltr) ltrIcon else rtlIcon
