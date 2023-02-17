@@ -1,6 +1,7 @@
 package com.andsoftapps.compose
 
 import android.content.pm.ActivityInfo
+import android.util.Log
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
@@ -43,6 +44,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.drawscope.ContentDrawScope
+import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInParent
@@ -63,6 +65,8 @@ import androidx.compose.ui.zIndex
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.andsoftapps.ui.theme.NotesLineColor
 import com.andsoftapps.ui.theme.NotesPageColor
+import com.andsoftapps.ui.theme.Ocean3
+import com.andsoftapps.ui.theme.Shadow4
 import com.andsoftapps.ui.theme.textSecondary
 import com.andsoftapps.ui.theme.uiBackground
 import com.andsoftapps.viewmodel.DiaryDetailViewModel
@@ -123,7 +127,7 @@ private fun Header() {
         modifier = Modifier
             .height(280.dp)
             .fillMaxWidth()
-            .background(Brush.horizontalGradient(listOf(MaterialTheme.colors.primary)))
+            .background(Brush.horizontalGradient(listOf(Shadow4, Ocean3)))
     )
 }
 
@@ -201,7 +205,10 @@ private fun DetailBody(scroll: ScrollState,
 
                     Spacer(
                         Modifier
-                            .height(TitleHeight /* + 3.dp */)
+                            .height(TitleHeight)
+                            .onGloballyPositioned { layoutCoordinates ->
+                                titleHeightOffsetFromParent = layoutCoordinates.positionInParent()
+                            }
                             .fillMaxWidth(fraction = 0.05f)
                             .background(color = Color.Green)
                     )
@@ -219,6 +226,11 @@ private fun DetailBody(scroll: ScrollState,
                         editBoxOffsetFromParent = layoutCoordinates.positionInParent() }
                         .layout {
                                 measurable, constraints ->
+
+                            //this call is needed for Compose to call the onTextLayout (further below)
+                            // so that i can get the lineBottomHeight, but i don't know why
+                            // without this call, lineBottomHeight will be null
+                            measurable.maxIntrinsicHeight(constraints.maxWidth)
 
                             if (constraints.hasBoundedWidth) {
                                 notepadWidth = constraints.maxWidth
@@ -285,6 +297,7 @@ private fun ContentDrawScope.NotepadBackground(
             size = Size(notepadWidth.toFloat(), 1f),
         )
     }
+
 }
 
 @Composable
