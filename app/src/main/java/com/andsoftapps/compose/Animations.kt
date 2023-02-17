@@ -10,6 +10,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.Composable
@@ -55,15 +56,12 @@ fun PulsateButton(onClick: () -> Unit, brush: Brush,
                   imageModifier: Modifier = Modifier
 ) {
 
-    Box (modifier = Modifier
-        .bounceClick(onClick)
-        .size(30.dp)
-        .clip(CircleShape)
-        .background(
-            brush = brush
-        )
-        .then(boxModifier)
-    ) {
+    PulsateButtonSurroundingBox(
+        onClick,
+        brush,
+        boxModifier
+    )
+    {
         Image(modifier = imageModifier.align(Alignment.Center),
             contentDescription = contentDescription,
             painter = painterResource(id = backgroundDrawableId),
@@ -80,17 +78,35 @@ fun PulsateButton(onClick: () -> Unit,
                   imageModifier: Modifier = Modifier
 ) {
 
-    Box (modifier = Modifier
-        .bounceClick(onClick)
-        .size(30.dp)
-        .clip(CircleShape)
-        .background(brush = brush)
-        .then(boxModifier)
-    ) {
+    PulsateButtonSurroundingBox(
+        onClick,
+        brush,
+        boxModifier
+    )
+    {
         Image(modifier = imageModifier.align(Alignment.Center),
             contentDescription = contentDescription,
             imageVector = imageVector,
             colorFilter = ColorFilter.tint(Color.White)
         )
     }
+}
+
+@Composable
+fun PulsateButtonSurroundingBox(
+    onClick: () -> Unit,
+    brush: Brush,
+    modifier: Modifier = Modifier,
+    content: @Composable BoxScope.() -> Unit) {
+
+    Box (modifier = Modifier
+        .bounceClick(onClick)
+        .size(30.dp)
+        .clip(CircleShape)
+        .background(brush = brush)
+        .then(modifier)
+    ) {
+        content()
+    }
+
 }
