@@ -51,4 +51,22 @@ class DiaryDetailViewModel
         }
     }
 
+    fun setUserDiary(userDiaryNew: TextFieldValue) {
+        val state = _uiState.value
+        with (state) {
+            if (month != null && day != null) {
+                diaryCalendarRepository.delaySaveUserNotes(
+                    year = month.year,
+                    month = month.monthValue,
+                    day = day,
+                    userDiary = userDiaryNew.text
+                )
+            }
+        }
+
+        _uiState.update {
+            it.copy(userDiary = userDiaryNew.copy())
+        }
+    }
+
 }

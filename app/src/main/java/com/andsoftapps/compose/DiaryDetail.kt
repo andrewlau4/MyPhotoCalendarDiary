@@ -109,7 +109,10 @@ fun DiaryDetail(month: YearMonth,
 
         Header()
 
-
+        DetailBody(scroll = scroll,
+            userDiaryTextField = { uiState.userDiary },
+            userDiaryTextChangeCallback = { diaryDetailViewModel.setUserDiary(it) }
+        )
 
     }
 }
