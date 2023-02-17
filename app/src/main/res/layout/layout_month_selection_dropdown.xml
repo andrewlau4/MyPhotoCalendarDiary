@@ -20,9 +20,10 @@
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dip"
-            android:text="Year:"
             android:layout_marginBottom="5dp"
-            />
+            android:text="Year"
+            android:textAlignment="center"
+            android:textColor="#FFFFFF" />
 
         <Spinner
             android:id="@+id/year_selection_dropdown_list"
@@ -50,9 +51,10 @@
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dip"
-            android:text="Month:"
             android:layout_marginBottom="5dp"
-            />
+            android:text="Month"
+            android:textAlignment="center"
+            android:textColor="#FFFFFF" />
 
         <Spinner
             android:id="@+id/month_selection_dropdown_list"
