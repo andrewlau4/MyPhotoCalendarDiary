@@ -77,9 +77,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import coil.compose.AsyncImage
 import com.andsoftapps.R
 import com.andsoftapps.navigation.Route
@@ -119,6 +121,17 @@ fun DiaryCalendarScreen(viewModel: DiaryCalendarViewModel = hiltViewModel()) {
                 DiaryCalendar(month = { uiState.currentYearMonth },
                     monthChangeCallback = viewModel::setCurrentYearMonth)
 
+            }
+
+            composable(Route.Detail.route,
+                arguments = listOf(navArgument("date") { type = NavType.StringType })) {
+                    backStackEntry ->
+
+                val date = backStackEntry.arguments?.getString("date")
+
+                val (month, day) = Route.Detail.retrieveFromRoute(date!!)
+
+                DiaryDetail(month, day)
             }
 
         }
