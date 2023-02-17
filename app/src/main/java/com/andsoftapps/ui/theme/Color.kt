@@ -14,4 +14,5 @@ val NotesLineColor = Color(0xff00E6E6)
 val NotesPageColor = Color(0xffffffe6)
 
 val uiBackground = Neutral0
+val iconInteractive = Neutral0
 val textSecondary = Neutral7

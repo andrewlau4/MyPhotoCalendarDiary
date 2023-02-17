@@ -5,4 +5,5 @@
 
     <string name="year_selection_title">Select Year</string>
     <string name="month_selection_title">Select Month</string>
+    <string name="label_back">Back</string>
 </resources>

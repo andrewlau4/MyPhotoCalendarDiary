@@ -65,6 +65,7 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.PlatformTextStyle
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.TextStyle
@@ -92,6 +93,7 @@ import com.andsoftapps.ui.theme.NotesPageColor
 import com.andsoftapps.ui.theme.Ocean3
 import com.andsoftapps.ui.theme.RainbowColorsBrush
 import com.andsoftapps.ui.theme.Shadow4
+import com.andsoftapps.ui.theme.iconInteractive
 import com.andsoftapps.ui.theme.textSecondary
 import com.andsoftapps.ui.theme.uiBackground
 import com.andsoftapps.viewmodel.DiaryDetailViewModel
@@ -104,10 +106,10 @@ import kotlin.math.roundToInt
 
 
 private val BottomBarHeight = 56.dp
-private val TitleHeight = 128.dp          //green
-private val GradientScroll = 180.dp     //magenta
-private val ImageOverlap = 115.dp       //red
-private val MinTitleOffset = 56.dp     //yellow
+private val TitleHeight = 128.dp
+private val GradientScroll = 180.dp
+private val ImageOverlap = 115.dp
+private val MinTitleOffset = 56.dp
 private val MinImageOffset = 12.dp
 private val MaxTitleOffset = ImageOverlap + MinTitleOffset + GradientScroll
 private val ExpandedImageSize = 300.dp
@@ -170,9 +172,6 @@ private fun DetailBody(scroll: ScrollState,
                        userDiaryTextField: () -> TextFieldValue,
                        userDiaryTextChangeCallback: (TextFieldValue) -> Unit) {
 
-
-    var editBoxOffsetFromParent: Offset? = null
-
     var detailSurfaceOffsetFromParent by remember { mutableStateOf<Offset?>(null) }
     var titleHeightOffsetFromParent by remember { mutableStateOf<Offset?>(null) }
     var notepadWidth by remember { mutableStateOf<Int?>(null) }
@@ -207,7 +206,7 @@ private fun DetailBody(scroll: ScrollState,
                 .fillMaxWidth()
                 .statusBarsPadding()
                 .height(MinTitleOffset)
-                .background(color = Color.Yellow)
+                .background(color = MaterialTheme.colors.primary)
         )
 
         Column(modifier = Modifier.verticalScroll(state = scroll)) {
@@ -256,8 +255,7 @@ private fun DetailBody(scroll: ScrollState,
 
                     var lineBottomHeight by remember { mutableStateOf<Float?>(null) }
 
-                    Box(modifier = Modifier.onGloballyPositioned { layoutCoordinates ->
-                        editBoxOffsetFromParent = layoutCoordinates.positionInParent() }
+                    Box(modifier = Modifier
                         .layout {
                                 measurable, constraints ->
 
@@ -494,15 +492,14 @@ private fun Up(upPress: () -> Unit) {
             .padding(horizontal = 16.dp, vertical = 10.dp)
             .size(36.dp)
             .background(
-                //color = NavigationButtonBrush, //Neutral8.copy(alpha = 0.32f),
                 brush = NavigationButtonBrush,
                 shape = CircleShape
             )
     ) {
         Icon(
             imageVector = mirroringBackIcon(),
-            tint = Neutral0,    // JetsnackTheme.colors.iconInteractive,
-            contentDescription = "Back" // stringResource(R.string.label_back)
+            tint = iconInteractive,
+            contentDescription = stringResource(R.string.label_back)
         )
     }
 }
