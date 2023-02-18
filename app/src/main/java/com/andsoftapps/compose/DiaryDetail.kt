@@ -8,12 +8,15 @@ import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.interaction.Interaction
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
@@ -23,11 +26,13 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.Divider
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.LocalContentColor
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Shapes
+import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ArrowBack
 import androidx.compose.material.icons.outlined.ArrowForward
@@ -57,6 +62,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.layout.layout
+import androidx.compose.ui.layout.layoutId
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInParent
 import androidx.compose.ui.platform.LocalContext
@@ -76,26 +82,35 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.lerp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.util.lerp
 import androidx.compose.ui.zIndex
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.andsoftapps.R
+import com.andsoftapps.ui.theme.DividerAlpha
 import com.andsoftapps.ui.theme.NavigationButtonBrush
 import com.andsoftapps.ui.theme.Neutral0
+import com.andsoftapps.ui.theme.Neutral4
 import com.andsoftapps.ui.theme.NotesLineColor
 import com.andsoftapps.ui.theme.NotesPageColor
 import com.andsoftapps.ui.theme.Ocean3
 import com.andsoftapps.ui.theme.RainbowColorsBrush
 import com.andsoftapps.ui.theme.Shadow4
 import com.andsoftapps.ui.theme.iconInteractive
+import com.andsoftapps.ui.theme.textHelp
+import com.andsoftapps.ui.theme.textPrimary
 import com.andsoftapps.ui.theme.textSecondary
 import com.andsoftapps.ui.theme.uiBackground
+import com.andsoftapps.utils.MONTH_FORMATED_STRING
+import com.andsoftapps.utils.YEAR_FORMATED_STRING
+import com.andsoftapps.utils.YEAR_MONTH_FORMATED_STRING
 import com.andsoftapps.viewmodel.DiaryDetailViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -115,6 +130,9 @@ private val MaxTitleOffset = ImageOverlap + MinTitleOffset + GradientScroll
 private val ExpandedImageSize = 300.dp
 private val CollapsedImageSize = 150.dp
 private val HzPadding = Modifier.padding(horizontal = 24.dp)
+
+private val LayoutId_Title1 = "title1"
+private val LayoutId_Title2 = "title2"
 
 private val NumRows = 30
 
@@ -148,6 +166,8 @@ fun DiaryDetail(month: YearMonth,
             userDiaryTextField = { uiState.userDiary },
             userDiaryTextChangeCallback = { diaryDetailViewModel.setUserDiary(it) }
         )
+
+        Title(month = month, day = day) { scroll.value }
 
         DairyDetailImage(getImageUrl = { uiState.uri },
             scrollProvider = { scroll.value })
@@ -400,6 +420,142 @@ fun NotepadTextField(
             focusManager.clearFocus()
             keyboardController?.hide() }),
     )
+}
+
+@Composable
+private fun Title(month: YearMonth, day: Int, scrollProvider: () -> Int) {
+    val maxOffset = with(LocalDensity.current) { MaxTitleOffset.toPx() }
+    val minOffset = with(LocalDensity.current) { MinTitleOffset.toPx() }
+
+    val collapseRange = with(LocalDensity.current) { (MaxTitleOffset - MinTitleOffset).toPx() }
+    val collapseFractionProvider = {
+        val scrollProviderVal = scrollProvider()
+        (scrollProviderVal / collapseRange).coerceIn(0f, 1f)
+    }
+
+    Column(
+        verticalArrangement = Arrangement.Center,
+        modifier = Modifier
+            .heightIn(min = TitleHeight, max = TitleHeight)
+            .statusBarsPadding()
+            .offset {
+                val scroll = scrollProvider()
+                val offset = (maxOffset - scroll).coerceAtLeast(minOffset)
+                IntOffset(x = 0, y = offset.toInt())
+            }
+            .background(
+                color = MaterialTheme.colors.primary
+            )
+    ) {
+        Spacer(Modifier.height(16.dp))
+        TitleLayout(
+            collapseFractionProvider = collapseFractionProvider,
+//            title1 =  {
+//                Text(
+//                    text = month.format(YEAR_FORMATED_STRING),
+//                    style = MaterialTheme.typography.h4,
+//                    color = textSecondary,
+//                    modifier = HzPadding
+//                )
+//            },
+//            title2 = {
+//                Text(
+//                    text = month.format(MONTH_FORMATED_STRING),
+//                    style = MaterialTheme.typography.h4,
+//                    color = textSecondary,
+//                    modifier = HzPadding
+//                )
+//            }
+        ) {
+            Text(
+                text = "$day ${month.format(MONTH_FORMATED_STRING)}",
+                style = MaterialTheme.typography.h4,
+                color = Color.White,
+                modifier = HzPadding.layoutId(LayoutId_Title1)
+            )
+            Text(
+                text =  month.format(YEAR_FORMATED_STRING),
+                style = MaterialTheme.typography.h4,
+                color = Color.White,
+                modifier = HzPadding.layoutId(LayoutId_Title2)
+            )
+        }
+        Text(
+            text = "tagLine",  //snack.tagline,
+            style = MaterialTheme.typography.subtitle2,
+            fontSize = 20.sp,
+            color = textHelp,
+            modifier = HzPadding
+        )
+        Spacer(Modifier.height(4.dp))
+//        Text(
+//            text = "$4.00", //formatPrice(snack.price),
+//            style = MaterialTheme.typography.h6,
+//            color = textPrimary,
+//            modifier = HzPadding
+//        )
+//
+//        Spacer(Modifier.height(8.dp))
+//
+//        Divider(
+//            modifier = Modifier,  // modifier,
+//            color =   Neutral4.copy(alpha = DividerAlpha),  // color,
+//            thickness = 1.dp, // thickness,
+//            startIndent = 0.dp   //startIndent
+//        )
+    }
+}
+
+@OptIn(ExperimentalComposeUiApi::class)
+@Composable
+private fun TitleLayout(
+    collapseFractionProvider: () -> Float,
+//    title1: @Composable () -> Unit,
+//    title2: @Composable () -> Unit,
+    modifier: Modifier = Modifier,
+    content: @Composable () -> Unit
+) {
+    Layout(
+        modifier = modifier,
+        contents = listOf(content)
+    ) {
+        (measurables), constraints ->
+
+        check(measurables.size == 2)
+
+        val collapseFraction = collapseFractionProvider()
+
+        val placeables = measurables.groupBy {
+            it.layoutId
+        }.mapValues {
+            it.value[0].measure(constraints)
+        }
+
+        val title1Width = placeables.get(LayoutId_Title1)!!.width
+        val title1Height = placeables.get(LayoutId_Title1)!!.height
+
+        val title2Width = placeables.get(LayoutId_Title2)!!.width
+        val title2Height = placeables.get(LayoutId_Title2)!!.height
+
+        //want to move title1 to the next line when it is fully collapsed, so the
+        // destination of Y position is title2's height
+        val title1_XPosition = 0 // lerp(title1Width, 0, collapseFraction)
+        val title1_YPosition = lerp(0, title2Height, collapseFraction)
+
+        val title2_XPosition = lerp(title1Width, 0, collapseFraction)
+        val title2_YPosition = 0 //lerp(0, title1Height, collapseFraction)
+
+        val constraintHeight = //if (constraints.hasBoundedHeight) {
+        //    constraints.maxHeight
+        //} else {
+            title2_YPosition + placeables.get(LayoutId_Title2)!!.height
+        //}
+
+        layout(constraints.maxWidth, constraintHeight) {
+            placeables.get(LayoutId_Title1)!!.place(title1_XPosition, title1_YPosition)
+            placeables.get(LayoutId_Title2)!!.place(title2_XPosition, title2_YPosition)
+        }
+    }
 }
 
 @Composable

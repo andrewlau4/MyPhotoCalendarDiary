@@ -5,6 +5,8 @@ import java.time.format.DateTimeFormatter
 
 
 val YEAR_MONTH_FORMATED_STRING = DateTimeFormatter.ofPattern("MMMM yyyy")
+val YEAR_FORMATED_STRING = DateTimeFormatter.ofPattern("yyyy")
+val MONTH_FORMATED_STRING = DateTimeFormatter.ofPattern("MMMM")
 
 data class ValueHolder<T>(var value: T?)
 
