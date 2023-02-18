@@ -311,14 +311,16 @@ fun LazyGridScope.DiaryCalendarContent(month: YearMonth,
                 index - firstDayOfWeek + 1
             } else null
 
-            DayBox(dayInMonth, month)
+            if (dayInMonth != null) {
+                DayBox(dayInMonth, month)
+            }
         }
     }
 
 }
 
 @Composable
-fun DayBox(dayInMonth: Int?, month: YearMonth) {
+fun DayBox(dayInMonth: Int, month: YearMonth) {
 
     var expanded by remember { mutableStateOf(false) }
 
@@ -327,11 +329,7 @@ fun DayBox(dayInMonth: Int?, month: YearMonth) {
         modifier = Modifier
             .fillMaxWidth()
             .height(DAY_BOX_HEIGHT)
-            .clickable {
-                if (dayInMonth != null) {
-                    expanded = true
-                }
-            },
+            .clickable { expanded = true },
         border = BorderStroke(DAY_BOX_BODRDER, Color.Black)
     ) {
         Box {
@@ -355,7 +353,7 @@ fun DayBox(dayInMonth: Int?, month: YearMonth) {
                                             Intent.FLAG_GRANT_READ_URI_PERMISSION
                                         )
 
-                                    saveImgCallBack(month, dayInMonth!!, launchResultUri)
+                                    saveImgCallBack(month, dayInMonth, launchResultUri)
                                 }
                             }
                             else -> {
@@ -366,7 +364,7 @@ fun DayBox(dayInMonth: Int?, month: YearMonth) {
                 }
 
 
-            if (dayInMonth != null && launchResultUri != null) {
+            if (launchResultUri != null) {
                 AsyncImage(
                     model = launchResultUri,
                     contentDescription = "Image from photo picker",
@@ -376,9 +374,7 @@ fun DayBox(dayInMonth: Int?, month: YearMonth) {
                 )
             }
 
-            if (dayInMonth != null) {
-                DayIcon(Modifier.align(Alignment.TopStart), dayInMonth.toString())
-            }
+            DayIcon(Modifier.align(Alignment.TopStart), dayInMonth.toString())
 
             val diaryEntity = LocalDiaryEntities.current[dayInMonth]
             if (diaryEntity?.diaryCalendarEntity?.userDiary != null) {
@@ -388,47 +384,45 @@ fun DayBox(dayInMonth: Int?, month: YearMonth) {
                 QueryResultFoundIcon(Modifier.align(Alignment.BottomEnd))
             }
 
+            DropdownMenu(
+                expanded = expanded,
+                onDismissRequest = { expanded = false }
+            ) {
+                val navigationCallback = LocalNavigation.current
 
-            dayInMonth?.apply {
-                DropdownMenu(
-                    expanded = expanded,
-                    onDismissRequest = { expanded = false }
-                ) {
-                    val navigationCallback = LocalNavigation.current
-
-                    DropdownMenuItem(
-                        onClick = {
-                            val pickImagesIntent = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                                Intent(MediaStore.ACTION_PICK_IMAGES).apply {
-                                    type = "image/*"
-                                    putExtra(MediaStore.EXTRA_PICK_IMAGES_MAX, 2) // deafult is 1
-                                }
-                            } else {
-                                Intent(Intent.ACTION_OPEN_DOCUMENT, null).apply {
-                                    type = "image/*"
-                                }
+                DropdownMenuItem(
+                    onClick = {
+                        val pickImagesIntent = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                            Intent(MediaStore.ACTION_PICK_IMAGES).apply {
+                                type = "image/*"
+                                putExtra(MediaStore.EXTRA_PICK_IMAGES_MAX, 2) // deafult is 1
                             }
-
-                            getContentLauncher.launch(pickImagesIntent)
-
-                            expanded = false
+                        } else {
+                            Intent(Intent.ACTION_OPEN_DOCUMENT, null).apply {
+                                type = "image/*"
+                            }
                         }
-                    ) {
-                        Icon(imageVector = Icons.Filled.Face, contentDescription = "Pick Photos Menu Item")
-                        Spacer(modifier = Modifier.width(1.dp))
-                        Text("Pick Photo")
-                    }
 
-                    DropdownMenuItem(onClick = {
-                        navigationCallback(Route.Detail.createRoute(month, dayInMonth))
-                    }) {
+                        getContentLauncher.launch(pickImagesIntent)
 
-                        Icon(imageVector = Icons.Filled.Edit, contentDescription = "Edit Diary")
-                        Spacer(modifier = Modifier.width(1.dp))
-                        Text("Diary Detail")
+                        expanded = false
                     }
+                ) {
+                    Icon(imageVector = Icons.Filled.Face, contentDescription = "Pick Photos Menu Item")
+                    Spacer(modifier = Modifier.width(1.dp))
+                    Text("Pick Photo")
+                }
+
+                DropdownMenuItem(onClick = {
+                    navigationCallback(Route.Detail.createRoute(month, dayInMonth))
+                }) {
+
+                    Icon(imageVector = Icons.Filled.Edit, contentDescription = "Edit Diary")
+                    Spacer(modifier = Modifier.width(1.dp))
+                    Text("Diary Detail")
                 }
             }
+
         }
     }
 }
