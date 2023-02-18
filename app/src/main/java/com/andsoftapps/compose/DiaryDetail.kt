@@ -120,7 +120,6 @@ import kotlin.math.min
 import kotlin.math.roundToInt
 
 
-private val BottomBarHeight = 56.dp
 private val TitleHeight = 128.dp
 private val GradientScroll = 180.dp
 private val ImageOverlap = 115.dp
@@ -158,7 +157,6 @@ fun DiaryDetail(month: YearMonth,
 
     Box {
         val scroll = rememberScrollState(0)
-
 
         Header()
 
@@ -447,25 +445,8 @@ private fun Title(month: YearMonth, day: Int, scrollProvider: () -> Int) {
                 color = MaterialTheme.colors.primary
             )
     ) {
-//        Spacer(Modifier.height(16.dp))
         TitleLayout(
             collapseFractionProvider = collapseFractionProvider,
-//            title1 =  {
-//                Text(
-//                    text = month.format(YEAR_FORMATED_STRING),
-//                    style = MaterialTheme.typography.h4,
-//                    color = textSecondary,
-//                    modifier = HzPadding
-//                )
-//            },
-//            title2 = {
-//                Text(
-//                    text = month.format(MONTH_FORMATED_STRING),
-//                    style = MaterialTheme.typography.h4,
-//                    color = textSecondary,
-//                    modifier = HzPadding
-//                )
-//            }
         ) {
             Text(
                 text = "$day ${month.format(MONTH_FORMATED_STRING)}",
@@ -480,29 +461,6 @@ private fun Title(month: YearMonth, day: Int, scrollProvider: () -> Int) {
                 modifier = HzPadding.layoutId(LayoutId_Title2)
             )
         }
-//        Text(
-//            text = "tagLine",  //snack.tagline,
-//            style = MaterialTheme.typography.subtitle2,
-//            fontSize = 20.sp,
-//            color = textHelp,
-//            modifier = HzPadding
-//        )
-//        Spacer(Modifier.height(24.dp))
-//        Text(
-//            text = "$4.00", //formatPrice(snack.price),
-//            style = MaterialTheme.typography.h6,
-//            color = textPrimary,
-//            modifier = HzPadding
-//        )
-//
-//        Spacer(Modifier.height(8.dp))
-//
-//        Divider(
-//            modifier = Modifier,  // modifier,
-//            color =   Neutral4.copy(alpha = DividerAlpha),  // color,
-//            thickness = 1.dp, // thickness,
-//            startIndent = 0.dp   //startIndent
-//        )
     }
 }
 
@@ -510,8 +468,6 @@ private fun Title(month: YearMonth, day: Int, scrollProvider: () -> Int) {
 @Composable
 private fun TitleLayout(
     collapseFractionProvider: () -> Float,
-//    title1: @Composable () -> Unit,
-//    title2: @Composable () -> Unit,
     modifier: Modifier = Modifier,
     content: @Composable () -> Unit
 ) {
@@ -548,12 +504,6 @@ private fun TitleLayout(
 
         val title2_XPosition = lerp(title1Width, 0, collapseFraction)
         val title2_YPosition = lerp((constraintHeight - title2Height) / 2, 0, collapseFraction)
-
-        //val constraintHeight = constraintHeight //if (constraints.hasBoundedHeight) {
-        //    constraints.maxHeight
-        //} else {
-            //title1_YPosition + placeables.get(LayoutId_Title1)!!.height
-        //}
 
         layout(constraints.maxWidth, constraintHeight) {
             placeables.get(LayoutId_Title1)!!.place(title1_XPosition, title1_YPosition)
