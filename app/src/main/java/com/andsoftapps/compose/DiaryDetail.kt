@@ -447,7 +447,7 @@ private fun Title(month: YearMonth, day: Int, scrollProvider: () -> Int) {
                 color = MaterialTheme.colors.primary
             )
     ) {
-        Spacer(Modifier.height(16.dp))
+//        Spacer(Modifier.height(16.dp))
         TitleLayout(
             collapseFractionProvider = collapseFractionProvider,
 //            title1 =  {
@@ -480,14 +480,14 @@ private fun Title(month: YearMonth, day: Int, scrollProvider: () -> Int) {
                 modifier = HzPadding.layoutId(LayoutId_Title2)
             )
         }
-        Text(
-            text = "tagLine",  //snack.tagline,
-            style = MaterialTheme.typography.subtitle2,
-            fontSize = 20.sp,
-            color = textHelp,
-            modifier = HzPadding
-        )
-        Spacer(Modifier.height(4.dp))
+//        Text(
+//            text = "tagLine",  //snack.tagline,
+//            style = MaterialTheme.typography.subtitle2,
+//            fontSize = 20.sp,
+//            color = textHelp,
+//            modifier = HzPadding
+//        )
+//        Spacer(Modifier.height(24.dp))
 //        Text(
 //            text = "$4.00", //formatPrice(snack.price),
 //            style = MaterialTheme.typography.h6,
@@ -515,6 +515,8 @@ private fun TitleLayout(
     modifier: Modifier = Modifier,
     content: @Composable () -> Unit
 ) {
+    val constraintHeight = with(LocalDensity.current) { TitleHeight.roundToPx() }
+
     Layout(
         modifier = modifier,
         contents = listOf(content)
@@ -537,18 +539,20 @@ private fun TitleLayout(
         val title2Width = placeables.get(LayoutId_Title2)!!.width
         val title2Height = placeables.get(LayoutId_Title2)!!.height
 
+        val constraintHeight = constraintHeight
+
         //want to move title1 to the next line when it is fully collapsed, so the
         // destination of Y position is title2's height
         val title1_XPosition = 0 // lerp(title1Width, 0, collapseFraction)
-        val title1_YPosition = lerp(0, title2Height, collapseFraction)
+        val title1_YPosition = lerp((constraintHeight - title1Height) / 2, title2Height, collapseFraction)
 
         val title2_XPosition = lerp(title1Width, 0, collapseFraction)
-        val title2_YPosition = 0 //lerp(0, title1Height, collapseFraction)
+        val title2_YPosition = lerp((constraintHeight - title2Height) / 2, 0, collapseFraction)
 
-        val constraintHeight = //if (constraints.hasBoundedHeight) {
+        //val constraintHeight = constraintHeight //if (constraints.hasBoundedHeight) {
         //    constraints.maxHeight
         //} else {
-            title2_YPosition + placeables.get(LayoutId_Title2)!!.height
+            //title1_YPosition + placeables.get(LayoutId_Title1)!!.height
         //}
 
         layout(constraints.maxWidth, constraintHeight) {
