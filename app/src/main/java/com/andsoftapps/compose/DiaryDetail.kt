@@ -232,26 +232,23 @@ private fun DetailBody(scroll: ScrollState,
             Spacer(
                 Modifier
                     .height(GradientScroll)
-                    .fillMaxWidth(fraction = 0.05f)
-                    .background(color = Color.Magenta)
             )
 
             DetailSurface(
                 modifier = Modifier
-                    .fillMaxWidth(fraction = 0.9f)
+                    .fillMaxWidth()
                     .onGloballyPositioned { layoutCoordinates ->
                         detailSurfaceOffsetFromParent = layoutCoordinates.positionInParent()
                     },
                 color = Color.LightGray,
                 elevation = 10.dp,
-                shape = Shapes().medium
             ) {
                 Column {
                     Spacer(
                         Modifier
                             .height(ImageOverlap)
-                            .fillMaxWidth(fraction = 0.05f)
-                            .background(color = Color.Red)
+                            .fillMaxWidth()
+                            .background(color = MaterialTheme.colors.primary)
                     )
 
                     Spacer(
@@ -260,15 +257,15 @@ private fun DetailBody(scroll: ScrollState,
                             .onGloballyPositioned { layoutCoordinates ->
                                 titleHeightOffsetFromParent = layoutCoordinates.positionInParent()
                             }
-                            .fillMaxWidth(fraction = 0.05f)
-                            .background(color = Color.Green)
+                            .fillMaxWidth()
+                            .background(color = MaterialTheme.colors.primary)
                     )
 
                     Spacer(
                         Modifier
                             .height(16.dp)
-                            .fillMaxWidth(fraction = 0.05f)
-                            .background(color = Color.Cyan)
+                            .fillMaxWidth()
+                            .background(color = MaterialTheme.colors.primary)
                     )
 
                     var lineBottomHeight by remember { mutableStateOf<Float?>(null) }
@@ -499,7 +496,7 @@ private fun TitleLayout(
 
         //want to move title1 to the next line when it is fully collapsed, so the
         // destination of Y position is title2's height
-        val title1_XPosition = 0 // lerp(title1Width, 0, collapseFraction)
+        val title1_XPosition = 0
         val title1_YPosition = lerp((constraintHeight - title1Height) / 2, title2Height, collapseFraction)
 
         val title2_XPosition = lerp(title1Width, 0, collapseFraction)
