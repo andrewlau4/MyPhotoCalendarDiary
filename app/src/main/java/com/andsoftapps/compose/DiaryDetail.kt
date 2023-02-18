@@ -153,8 +153,6 @@ fun DiaryDetail(month: YearMonth,
     val navigationCallbackHandler = LocalNavigation.current
     InstallBackPressHandler { navigationCallbackHandler(null) }
 
-    val coroutineScope = rememberCoroutineScope()
-
     Box {
         val scroll = rememberScrollState(0)
 
@@ -492,21 +490,19 @@ private fun TitleLayout(
         val title2Width = placeables.get(LayoutId_Title2)!!.width
         val title2Height = placeables.get(LayoutId_Title2)!!.height
 
-        val constraintHeight = constraintHeight
-
         //both Y position starts at the center, they then move during collapse
 
         //want to move title1 to the next line when it is fully collapsed, so the
         // destination of Y position is title2's height
-        val title1_XPosition = 0
-        val title1_YPosition = lerp((constraintHeight - title1Height) / 2, title2Height, collapseFraction)
+        val title1XPosition = 0
+        val title1YPosition = lerp((constraintHeight - title1Height) / 2, title2Height, collapseFraction)
 
-        val title2_XPosition = lerp(title1Width, 0, collapseFraction)
-        val title2_YPosition = lerp((constraintHeight - title2Height) / 2, 0, collapseFraction)
+        val title2XPosition = lerp(title1Width, 0, collapseFraction)
+        val title2YPosition = lerp((constraintHeight - title2Height) / 2, 0, collapseFraction)
 
         layout(constraints.maxWidth, constraintHeight) {
-            placeables.get(LayoutId_Title1)!!.place(title1_XPosition, title1_YPosition)
-            placeables.get(LayoutId_Title2)!!.place(title2_XPosition, title2_YPosition)
+            placeables.get(LayoutId_Title1)!!.place(title1XPosition, title1YPosition)
+            placeables.get(LayoutId_Title2)!!.place(title2XPosition, title2YPosition)
         }
     }
 }
