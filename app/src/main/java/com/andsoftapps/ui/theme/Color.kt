@@ -5,6 +5,7 @@ import androidx.compose.ui.graphics.Color
 val Shadow4 = Color(0xff7057f5)
 val Shadow5 = Color(0xff4b30ed)
 val Ocean3 = Color(0xff86f7fa)
+val Ocean9 = Color(0xffe6ffff)
 
 val Neutral0 = Color(0xffffffff)
 val Neutral4 = Color(0x1f000000)

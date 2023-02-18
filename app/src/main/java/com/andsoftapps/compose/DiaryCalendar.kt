@@ -92,6 +92,7 @@ import com.andsoftapps.ui.theme.DarkGreen2
 import com.andsoftapps.ui.theme.LightGreen8
 import com.andsoftapps.ui.theme.LightRed8
 import com.andsoftapps.ui.theme.NavigationButtonBrush
+import com.andsoftapps.ui.theme.Ocean9
 import com.andsoftapps.utils.YEAR_MONTH_FORMATED_STRING
 import com.andsoftapps.utils.firstDayOfWeek
 import com.andsoftapps.utils.plus
@@ -230,7 +231,7 @@ fun DiaryCalendarLayout(monthLambda: () -> YearMonth, monthChangeCallback: ((Yea
                 )
             }) {
 
-                Row(Modifier.weight(1f, true)) {
+                Row(Modifier.weight(1f, true).background(color = Ocean9)) {
 
                     //these values are derived from YearMonth and won't change as long
                     // as the YearMonth doesn't change, so they need not be MutableState
