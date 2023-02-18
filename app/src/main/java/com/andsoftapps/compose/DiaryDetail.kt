@@ -494,6 +494,8 @@ private fun TitleLayout(
 
         val constraintHeight = constraintHeight
 
+        //both Y position starts at the center, they then move during collapse
+
         //want to move title1 to the next line when it is fully collapsed, so the
         // destination of Y position is title2's height
         val title1_XPosition = 0
