@@ -1,52 +1,54 @@
 package com.andsoftapps.fragment
 
+import android.app.SearchManager
+import android.content.Context
 import android.os.Bundle
+import android.provider.SearchRecentSuggestions
+import android.util.Log
 import android.view.LayoutInflater
+import android.view.Menu
+import android.view.MenuInflater
+import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
+import android.widget.AutoCompleteTextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.SearchView
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.core.view.MenuProvider
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
 import com.andsoftapps.R
 import com.andsoftapps.compose.ComposeDiaryCalendarLocalProviders
 import com.andsoftapps.compose.DiaryCalendarScreen
+import com.andsoftapps.provider.DiaryRecentSuggestProvider
 import com.andsoftapps.viewmodel.DiaryCalendarViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
 
-// TODO: Rename parameter arguments, choose names that match
-// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-private const val ARG_PARAM1 = "param1"
-private const val ARG_PARAM2 = "param2"
+private val START_SEARCH_CHAR_THRESHOLD = 2
 
-/**
- * A simple [Fragment] subclass.
- * Use the [DiaryCalendarFragment.newInstance] factory method to
- * create an instance of this fragment.
- */
 @AndroidEntryPoint
 class DiaryCalendarFragment : Fragment() {
-    // TODO: Rename and change types of parameters
-    private var param1: String? = null
-    private var param2: String? = null
 
     private val diaryCalendarViewModel: DiaryCalendarViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        arguments?.let {
-            param1 = it.getString(ARG_PARAM1)
-            param2 = it.getString(ARG_PARAM2)
-        }
+
     }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        // Inflate the layout for this fragment
+
+        val menuHost = requireActivity()
+        val menu = DiaryMenu()
+        menuHost.addMenuProvider(menu, viewLifecycleOwner, Lifecycle.State.RESUMED)
+
         return inflater.inflate(R.layout.fragment_diary_calendar, container, false)
             .apply {
                 findViewById<ComposeView>(R.id.compose_view).apply {
@@ -66,22 +68,64 @@ class DiaryCalendarFragment : Fragment() {
     }
 
     companion object {
-        /**
-         * Use this factory method to create a new instance of
-         * this fragment using the provided parameters.
-         *
-         * @param param1 Parameter 1.
-         * @param param2 Parameter 2.
-         * @return A new instance of fragment DiaryCalendarFragment.
-         */
-        // TODO: Rename and change types and number of parameters
         @JvmStatic
-        fun newInstance(param1: String, param2: String) =
-            DiaryCalendarFragment().apply {
-                arguments = Bundle().apply {
-                    putString(ARG_PARAM1, param1)
-                    putString(ARG_PARAM2, param2)
-                }
+        fun newInstance() =
+            DiaryCalendarFragment()
+    }
+
+    inner class DiaryMenu : MenuProvider {
+        override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
+            menuInflater.inflate(R.menu.fragment_diary_menu, menu)
+
+            val searchItem = menu.findItem(R.id.menu_item_search)
+
+            val searchView = searchItem.actionView as? SearchView
+
+            searchView?.queryHint = "enter search"
+
+            val searchManager = activity?.getSystemService(Context.SEARCH_SERVICE) as SearchManager
+
+            activity?.getComponentName()?.let {
+                searchView?.setSearchableInfo(searchManager.getSearchableInfo(it))
             }
+
+            val searchAutoCompleteTextView =
+                searchView?.findViewById(
+                    androidx.appcompat.R.id.search_src_text
+                ) as AutoCompleteTextView
+
+            searchAutoCompleteTextView.setThreshold(START_SEARCH_CHAR_THRESHOLD)
+
+            searchAutoCompleteTextView.apply {
+                setHintTextColor(resources.getColor(R.color.purple_700, null))
+                setTextColor(resources.getColor(R.color.black, null))
+                setBackgroundColor(resources.getColor(R.color.white, null))
+            }
+
+            searchView?.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+                override fun onQueryTextSubmit(query: String?): Boolean {
+                    searchView?.clearFocus()
+                    SearchRecentSuggestions(
+                        this@DiaryCalendarFragment.activity,
+                        DiaryRecentSuggestProvider.AUTHORITY,
+                        DiaryRecentSuggestProvider.MODE
+                        ).saveRecentQuery(query, null)
+                    diaryCalendarViewModel.setQuery(query)
+                    return true
+                }
+
+                override fun onQueryTextChange(newText: String?): Boolean {
+                    diaryCalendarViewModel.setQuery(newText)
+                    return false
+                }
+            })
+        }
+
+        override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
+            return when (menuItem.itemId) {
+                R.id.menu_item_search -> true
+                else -> false
+            }
+        }
     }
 }

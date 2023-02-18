@@ -135,7 +135,7 @@ private val LayoutId_Title2 = "title2"
 
 private val NumRows = 30
 
-//this layout and animation is based on jetpack comppose samples:
+//this layout and animation is based on jetpack compose samples:
 //  https://github.com/android/compose-samples
 @Composable
 fun DiaryDetail(month: YearMonth,

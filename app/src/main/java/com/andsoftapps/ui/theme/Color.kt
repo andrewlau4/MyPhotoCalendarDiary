@@ -14,6 +14,9 @@ val Neutral7 = Color(0xde000000)
 val NotesLineColor = Color(0xff00E6E6)
 val NotesPageColor = Color(0xffffffe6)
 
+val BrightRed5 = Color(0xffff0000)
+val LightRed8 = Color(0xffffb3b3)
+
 val uiBackground = Neutral0
 val iconInteractive = Neutral0
 val textPrimary = Shadow5

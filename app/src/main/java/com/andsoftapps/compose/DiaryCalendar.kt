@@ -52,6 +52,7 @@ import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Face
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.rememberBottomSheetScaffoldState
 import androidx.compose.material.rememberBottomSheetState
 import androidx.compose.runtime.Composable
@@ -74,6 +75,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -85,6 +87,8 @@ import androidx.navigation.navArgument
 import coil.compose.AsyncImage
 import com.andsoftapps.R
 import com.andsoftapps.navigation.Route
+import com.andsoftapps.ui.theme.BrightRed5
+import com.andsoftapps.ui.theme.LightRed8
 import com.andsoftapps.ui.theme.NavigationButtonBrush
 import com.andsoftapps.utils.YEAR_MONTH_FORMATED_STRING
 import com.andsoftapps.utils.firstDayOfWeek
@@ -314,33 +318,6 @@ fun LazyGridScope.DiaryCalendarContent(month: YearMonth,
 fun DayBox(dayInMonth: Int?, month: YearMonth) {
 
     var expanded by remember { mutableStateOf(false) }
-    val dayImage = LocalDiaryEntities.current[dayInMonth]?.diaryCalendarEntity?.imagePath
-    val context = LocalContext.current
-    val saveImgCallBack = LocalSaveImgPath.current
-    var launchResultUri by remember(dayImage) { mutableStateOf<Uri?>( dayImage?.let { Uri.parse(it) }) }
-    val getContentLauncher =
-        rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-            result?.let { nonNullableResult ->
-                when (nonNullableResult.resultCode == Activity.RESULT_OK) {
-                    true -> {
-                        val intent = nonNullableResult.data
-                        launchResultUri = intent?.data
-                        launchResultUri?.apply {
-                            context.getContentResolver()
-                                .takePersistableUriPermission(launchResultUri!!,
-                                    // flags
-                                    Intent.FLAG_GRANT_READ_URI_PERMISSION
-                                )
-
-                            saveImgCallBack(month, dayInMonth!!, launchResultUri)
-                        }
-                    }
-                    else -> {
-                        Log.d(TAG, "GetContent URI returns false")
-                    }
-                }
-            }
-        }
 
     Card(
         shape = RoundedCornerShape(3.dp),
@@ -355,6 +332,37 @@ fun DayBox(dayInMonth: Int?, month: YearMonth) {
         border = BorderStroke(DAY_BOX_BODRDER, Color.Black)
     ) {
         Box {
+
+            val context = LocalContext.current
+            val saveImgCallBack = LocalSaveImgPath.current
+
+            val dayImage = LocalDiaryEntities.current[dayInMonth]?.diaryCalendarEntity?.imagePath
+            var launchResultUri by remember(dayImage) { mutableStateOf<Uri?>( dayImage?.let { Uri.parse(it) }) }
+            val getContentLauncher =
+                rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+                    result?.let { nonNullableResult ->
+                        when (nonNullableResult.resultCode == Activity.RESULT_OK) {
+                            true -> {
+                                val intent = nonNullableResult.data
+                                launchResultUri = intent?.data
+                                launchResultUri?.apply {
+                                    context.getContentResolver()
+                                        .takePersistableUriPermission(launchResultUri!!,
+                                            // flags
+                                            Intent.FLAG_GRANT_READ_URI_PERMISSION
+                                        )
+
+                                    saveImgCallBack(month, dayInMonth!!, launchResultUri)
+                                }
+                            }
+                            else -> {
+                                Log.d(TAG, "GetContent URI returns false")
+                            }
+                        }
+                    }
+                }
+
+
             if (dayInMonth != null && launchResultUri != null) {
                 AsyncImage(
                     model = launchResultUri,
@@ -367,6 +375,11 @@ fun DayBox(dayInMonth: Int?, month: YearMonth) {
 
             if (dayInMonth != null) {
                 DayIcon(Modifier.align(Alignment.TopStart), dayInMonth.toString())
+            }
+
+            val queryResult = LocalDiaryEntities.current[dayInMonth]?.queryResult
+            if (queryResult == true) {
+                QueryResultFoundImg(Modifier.align(Alignment.BottomEnd))
             }
 
             dayInMonth?.apply {
@@ -438,6 +451,22 @@ fun BoxScope.DayIcon(modifier: Modifier = Modifier, text: String) {
             color = Color.White,
             modifier = Modifier
                 .align(Alignment.Center))
+    }
+}
+
+@Preview
+@Composable
+fun BoxScope.QueryResultFoundImg(modifier: Modifier = Modifier) {
+    CalendarIconBackground(modifier = modifier,
+        brush = Brush.horizontalGradient(listOf(
+            BrightRed5,
+            LightRed8))) {
+        Icon(
+            modifier = Modifier.align(Alignment.Center),
+            imageVector = Icons.Filled.Search,
+            contentDescription = "Query Matched",
+            tint = Color.White
+        )
     }
 }
 
