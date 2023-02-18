@@ -53,6 +53,7 @@ import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Face
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.rememberBottomSheetScaffoldState
 import androidx.compose.material.rememberBottomSheetState
 import androidx.compose.runtime.Composable
@@ -85,9 +86,10 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import coil.compose.AsyncImage
-import com.andsoftapps.R
 import com.andsoftapps.navigation.Route
 import com.andsoftapps.ui.theme.BrightRed5
+import com.andsoftapps.ui.theme.DarkGreen2
+import com.andsoftapps.ui.theme.LightGreen8
 import com.andsoftapps.ui.theme.LightRed8
 import com.andsoftapps.ui.theme.NavigationButtonBrush
 import com.andsoftapps.utils.YEAR_MONTH_FORMATED_STRING
@@ -377,10 +379,14 @@ fun DayBox(dayInMonth: Int?, month: YearMonth) {
                 DayIcon(Modifier.align(Alignment.TopStart), dayInMonth.toString())
             }
 
-            val queryResult = LocalDiaryEntities.current[dayInMonth]?.queryResult
-            if (queryResult == true) {
-                QueryResultFoundImg(Modifier.align(Alignment.BottomEnd))
+            val diaryEntity = LocalDiaryEntities.current[dayInMonth]
+            if (diaryEntity?.diaryCalendarEntity?.userDiary != null) {
+                UserDiaryHasEntryIcon(Modifier.align(Alignment.BottomStart))
             }
+            if (diaryEntity?.queryResult == true) {
+                QueryResultFoundIcon(Modifier.align(Alignment.BottomEnd))
+            }
+
 
             dayInMonth?.apply {
                 DropdownMenu(
@@ -456,7 +462,7 @@ fun BoxScope.DayIcon(modifier: Modifier = Modifier, text: String) {
 
 @Preview
 @Composable
-fun BoxScope.QueryResultFoundImg(modifier: Modifier = Modifier) {
+fun BoxScope.QueryResultFoundIcon(modifier: Modifier = Modifier) {
     CalendarIconBackground(modifier = modifier,
         brush = Brush.horizontalGradient(listOf(
             BrightRed5,
@@ -470,6 +476,21 @@ fun BoxScope.QueryResultFoundImg(modifier: Modifier = Modifier) {
     }
 }
 
+@Composable
+fun BoxScope.UserDiaryHasEntryIcon(modifier: Modifier = Modifier) {
+    CalendarIconBackground(modifier = modifier,
+        brush = Brush.horizontalGradient(listOf(
+            DarkGreen2,
+            LightGreen8))) {
+        Icon(
+            modifier = Modifier.align(Alignment.Center),
+            imageVector = Icons.Outlined.Info,
+            contentDescription = "User Diary Has Entry",
+            tint = Color.White
+        )
+    }
+
+}
 
 @Composable
 fun DiaryCalendarBottomSheetNavigation(monthLambda: () -> YearMonth,

@@ -19,7 +19,7 @@ val LocalQueryDairyEntries =
     staticCompositionLocalOf<(YearMonth) -> Flow<Map<Int, DiaryCalendarEntityWithQueryResult?>>> { error("LocalQueryDairyEntries not initialized") }
 
 val LocalDiaryEntities =
-    compositionLocalOf<Map<Int, DiaryCalendarEntityWithQueryResult?>> { error("LocalDiaryEntities not initialized") }
+    compositionLocalOf<Map<Int, DiaryCalendarEntityWithQueryResult?>> { mapOf() }
 
 val LocalHideShowActionBar =
     staticCompositionLocalOf<(Boolean) -> Unit> { error("LocalHideShowActionBar not provided") }
