@@ -10,9 +10,9 @@
   <img src="readme/search_1.gif" alt="Search Demo" width="240" />   <img src="readme/search_2.gif" alt="Search Demo" width="240" />
 * ComposeView and XML interoperability
 * Jetpack Compose custom layout
-* Layout animation to rearrange image and text positions
+* Layout animation to rearrange image and text positions<br />
   <img src="readme/custom_layout.gif" alt="Custom Layout" width="240" />
-* Using Intent for image retrieval
+* Using Intent for image retrieval<br />
   <img src="readme/image_retrieve.gif" alt="Image Retrieve" width="240" />
 
 
