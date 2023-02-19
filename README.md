@@ -11,6 +11,6 @@
 * ComposeView and XML interoperability
 * Jetpack Compose custom layout
 * Custom layout animation to rearrange image and text positions
-  <img src="readme/custom_layout.gif" alt="Custom Layout" width="240" />
+<img src="readme/custom_layout.gif" alt="Custom Layout" width="240" />
 
 
