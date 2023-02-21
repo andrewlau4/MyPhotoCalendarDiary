@@ -12,7 +12,7 @@ android {
     compileSdk 33
 
     defaultConfig {
-        applicationId "com.andsoftapps"
+        applicationId "com.andsoftapps.myphotocalendardiary"
         minSdk 24
         targetSdk 33
         versionCode 1
