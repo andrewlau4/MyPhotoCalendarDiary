@@ -9,6 +9,10 @@ import androidx.room.Query
 import kotlinx.coroutines.flow.Flow
 import java.time.YearMonth
 
+//how to debug db
+//https://stackoverflow.com/questions/64176567/why-there-is-no-android-database-inspector-tools-in-android-studio-4-2-canary-13
+//https://medium.com/androiddevelopers/database-inspector-9e91aa265316
+
 private val TAG = "DiaryCalendarDao"
 @Dao
 interface DiaryCalendarDao {
@@ -16,15 +20,32 @@ interface DiaryCalendarDao {
     @Query("Select * from diarycalendar")
     fun getAllDiaryCalendar(): Flow<List<DiaryCalendarEntity>>
 
-    @Query("Select diarycalendar.*," +
-            " CASE WHEN " +
-            "fts.id" +
-            " IS NOT NULL THEN " +
-            " TRUE " +
-            "ELSE FALSE END as queryResult" +
-            " from diarycalendar left join diarycalendar_fts as fts " +
-            "on fts.id = diarycalendar.id and fts.diarycalendar_fts MATCH :query " +
-            "where year = :year and month = :month"
+    //using the Database Inspector to debug this query, see https://medium.com/androiddevelopers/database-inspector-9e91aa265316
+    //it seems on some device, i cannot use MATCH when joining a FTS table with a non FTS table
+    //but the 'with' statement seems to work, so change below to use 'with' statement
+    @Query(
+        //this is valid syntax but not working on some device
+//        """Select diarycalendar.*,
+//             CASE WHEN
+//            fts.id
+//             IS NOT NULL THEN
+//             1
+//            ELSE 0 END as queryResult
+//             from diarycalendar left join diarycalendar_fts as fts
+//            on fts.id = diarycalendar.id
+//            where year = :year and month = :month
+//              and fts.diarycalendar_fts MATCH :query  """
+
+        """ with fts as (select id from diarycalendar_fts where userDiary MATCH :query)
+            Select diarycalendar.*, 
+             CASE WHEN 
+            fts.id 
+             IS NOT NULL THEN 
+             1 
+            ELSE 0 END as queryResult 
+             from diarycalendar left join fts 
+            on fts.id = diarycalendar.id 
+            where year = :year and month = :month """
     )
     fun getDiaryCalendarByMonthWithQuery(year: Int, month: Int, query: String = "*"): Flow<List<DiaryCalendarEntityWithQueryResult>>
 
