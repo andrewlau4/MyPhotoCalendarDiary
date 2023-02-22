@@ -496,6 +496,9 @@ fun DiaryCalendarBottomSheetNavigation(monthLambda: () -> YearMonth,
 
     ConstraintLayout(modifier = Modifier
         .fillMaxWidth()
+        .background(
+            color = Ocean9
+        )
         .height(BOTTOM_SHEET_HEIGHT)
         .clip(
             shape = RoundedCornerShape(
