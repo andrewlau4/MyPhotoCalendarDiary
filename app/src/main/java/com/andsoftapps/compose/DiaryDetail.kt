@@ -82,8 +82,11 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.ExperimentalUnitApi
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.LayoutDirection
+import androidx.compose.ui.unit.TextUnit
+import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.lerp
@@ -415,6 +418,7 @@ fun NotepadTextField(
     )
 }
 
+@OptIn(ExperimentalUnitApi::class)
 @Composable
 private fun Title(month: YearMonth, day: Int, scrollProvider: () -> Int) {
     val maxOffset = with(LocalDensity.current) { MaxTitleOffset.toPx() }
@@ -443,15 +447,25 @@ private fun Title(month: YearMonth, day: Int, scrollProvider: () -> Int) {
         TitleLayout(
             collapseFractionProvider = collapseFractionProvider,
         ) {
+            val scrollProgress = collapseFractionProvider()
+
+            val fontSizeAnimation: Float = lerp(
+                MaterialTheme.typography.h4.fontSize.value,
+                MaterialTheme.typography.h5.fontSize.value,
+                scrollProgress
+            )
+
             Text(
                 text = "$day ${month.format(MONTH_FORMATED_STRING)}",
-                style = MaterialTheme.typography.h4,
+                style = MaterialTheme.typography.h4.copy(fontSize =
+                    TextUnit( fontSizeAnimation, MaterialTheme.typography.h4.fontSize.type ) ),
                 color = Color.White,
                 modifier = HzPadding.layoutId(LayoutId_Title1)
             )
             Text(
                 text =  month.format(YEAR_FORMATED_STRING),
-                style = MaterialTheme.typography.h4,
+                style = MaterialTheme.typography.h4.copy(fontSize =
+                    TextUnit( fontSizeAnimation, MaterialTheme.typography.h4.fontSize.type ) ),
                 color = Color.White,
                 modifier = HzPadding.layoutId(LayoutId_Title2)
             )

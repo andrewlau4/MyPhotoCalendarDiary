@@ -17,6 +17,8 @@ android {
         targetSdk 33
         versionCode 1
         versionName "1.0"
+        //https://www.geeksforgeeks.org/desugaring-in-android/
+        multiDexEnabled true
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
@@ -61,7 +63,7 @@ android {
 
 dependencies {
 
-    coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:1.2.2'
+    coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.0.2'
 
     implementation 'androidx.core:core-ktx:1.9.0'
     implementation 'androidx.appcompat:appcompat:1.6.1'
