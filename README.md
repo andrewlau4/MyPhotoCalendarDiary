@@ -1,6 +1,8 @@
 # My Photo Calendar Diary Android App
 <img src="readme/swipe_animation.gif" alt="My Photo Calendar Diary" width="240" />
-
+<br />
+This project is in ongoing development; and is in [Google Play Store Open Test](https://play.google.com/store/apps/details?id=com.andsoftapps.myphotocalendardiary)
+<br />
 ### This project demonstrates the following android development techniques:
 
 * Hilt and Dagger Dependency Injection
